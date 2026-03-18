@@ -10,6 +10,8 @@ let elements = [
   },
 ];
 
+let nextId = 2;
+
 let selectedElement = null;
 let isDragging = false;
 let dragOffset = { x: 0, y: 0 };
@@ -138,6 +140,36 @@ canvas.addEventListener("wheel", (e) => {
   camera.x = worldX - mouseX / camera.zoom;
   camera.y = worldY - mouseY / camera.zoom;
 });
+
+canvas.addEventListener("dblclick", (e) => {
+  if (spacePressed || isPanning) return;
+
+  const mouse = screenToWorld(e.clientX, e.clientY);
+
+  const newElement = {
+    id: nextId++,
+    type: "rect",
+    x: mouse.x - 75,
+    y: mouse.y - 50,
+    w: 150,
+    h: 100,
+    color: randomColor(),
+  };
+
+  elements.push(newElement);
+
+  // Auto select + start dragging (feels smooth)
+  selectedElement = newElement;
+  isDragging = true;
+
+  dragOffset.x = 75;
+  dragOffset.y = 50;
+});
+
+function randomColor() {
+  const colors = ["#4CAF50", "#2196F3", "#FF9800", "#E91E63", "#9C27B0"];
+  return colors[Math.floor(Math.random() * colors.length)];
+}
 
 function screenToWorld(x, y) {
   return {
