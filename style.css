@@ -13,13 +13,17 @@ canvas {
 #textEditor {
   position: absolute;
   display: none;
-  background: transparent;
+  background: rgba(30,30,30,0.9);
   border: 1px solid #555;
   color: white;
   outline: none;
   resize: none;
-  overflow: hidden;
+  padding: 4px 6px;
+  border-radius: 6px;
   font-family: Arial;
+  min-width: 50px;
+  min-height: 24px;
+  box-shadow: 0 0 8px rgba(0,0,0,0.5);
 }
 
 #toolbar {

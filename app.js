@@ -45,6 +45,8 @@ buttons.forEach((btn) => {
   });
 });
 
+let currentFileName = "board.kj";
+
 function updateToolbar() {
   buttons.forEach((btn) => {
     btn.classList.toggle("active", btn.dataset.tool === currentTool);
@@ -59,6 +61,7 @@ let isPanning = false;
 let spacePressed = false;
 let lastMouse = { x: 0, y: 0 };
 
+// TODO: textarea is now good looking but not working properly, it should be fixed
 const textarea = document.getElementById("textEditor");
 
 textarea.addEventListener("blur", stopEditingText);
@@ -78,9 +81,16 @@ document.getElementById("fileInput").addEventListener("change", (e) => {
 
 window.addEventListener("keydown", (e) => {
   // Save (Ctrl + S)
+  // Ctrl+S → Save
   if (e.ctrlKey && e.key === "s") {
     e.preventDefault();
-    saveFile();
+    saveFile(false);
+  }
+
+  // Ctrl+Shift+S → Save As
+  if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "s") {
+    e.preventDefault();
+    saveFile(true);
   }
 
   // Load (Ctrl + O)
@@ -118,6 +128,8 @@ window.addEventListener("keydown", (e) => {
     if (e.key === "v") currentTool = "select";
     if (e.key === "t") currentTool = "text";
     if (e.key === "r") currentTool = "rect";
+
+    updateToolbar(); // 🔥 ADD THIS
   }
 
   // Ctrl + ]
@@ -207,6 +219,30 @@ canvas.addEventListener("mousedown", (e) => {
     }
   }
 
+  // TODO: when i am in select tool and double click it should do nothhing(maybe something unique like setting zome to something )
+
+  if (currentTool === "text") {
+    const mouse = screenToWorld(e.clientX, e.clientY);
+
+    const newText = {
+      id: nextId++,
+      type: "text",
+      x: mouse.x,
+      y: mouse.y,
+      text: "",
+      style: {
+        fontSize: 24,
+        fontFamily: "Arial",
+        color: "#ffffff",
+      },
+    };
+
+    elements.push(newText);
+    startEditingText(newText);
+
+    return;
+  }
+
   // RECT TOOL → create instantly
   if (currentTool === "rect") {
     const mouse = screenToWorld(e.clientX, e.clientY);
@@ -238,6 +274,13 @@ window.addEventListener("mouseup", () => {
   isDragging = false;
   isResizing = false;
   resizeHandle = null;
+
+  if (selectedElement && selectedElement.type === "rect") {
+    if (Math.abs(selectedElement.w) < 5 || Math.abs(selectedElement.h) < 5) {
+      elements = elements.filter((el) => el !== selectedElement);
+      selectedElement = null;
+    }
+  }
 });
 
 // Mouse move → pan logic
@@ -331,16 +374,25 @@ canvas.addEventListener("dblclick", (e) => {
   const mouse = screenToWorld(e.clientX, e.clientY);
 
   // Check if clicking existing text → edit
+  // TODO: text resize and drag is not as desired, needs work
   for (let el of elements) {
     if (el.type === "text") {
+      const width = ctx.measureText(el.text).width;
+      const height = el.style.fontSize;
+
       if (
         mouse.x >= el.x &&
-        mouse.x <= el.x + 200 &&
-        mouse.y >= el.y - 30 &&
-        mouse.y <= el.y + 30
+        mouse.x <= el.x + width &&
+        mouse.y <= el.y &&
+        mouse.y >= el.y - height
       ) {
-        startEditingText(el);
-        return;
+        selectedElement = el;
+        isDragging = true;
+
+        dragOffset.x = mouse.x - el.x;
+        dragOffset.y = mouse.y - el.y;
+
+        break;
       }
     }
   }
@@ -363,12 +415,20 @@ canvas.addEventListener("dblclick", (e) => {
   startEditingText(newText);
 });
 
-function saveFile() {
+// TODO: save function when called normally is saving normally but also as board.kj
+
+function saveFile(saveAs = false) {
   const data = {
     version: 1,
     elements: elements,
     camera: camera,
   };
+
+  if (saveAs || !currentFileName) {
+    const name = prompt("File name:", currentFileName || "board.kj");
+    if (!name) return;
+    currentFileName = name.endsWith(".kj") ? name : name + ".kj";
+  }
 
   const json = JSON.stringify(data, null, 2);
 
@@ -377,8 +437,7 @@ function saveFile() {
 
   const a = document.createElement("a");
   a.href = url;
-  name = prompt("Enter file name:", "board.kj");
-  a.download = name;
+  a.download = currentFileName;
   a.click();
 
   URL.revokeObjectURL(url);
