@@ -21,3 +21,29 @@ canvas {
   overflow: hidden;
   font-family: Arial;
 }
+
+#toolbar {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  background: #1e1e1e;
+  padding: 8px;
+  border-radius: 8px;
+  display: flex;
+  gap: 6px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.5);
+}
+
+#toolbar button {
+  background: #333;
+  color: white;
+  border: none;
+  padding: 8px 10px;
+  cursor: pointer;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+#toolbar button.active {
+  background: #4CAF50;
+}

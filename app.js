@@ -36,6 +36,24 @@ let camera = {
   zoom: 1,
 };
 
+const buttons = document.querySelectorAll("#toolbar button");
+
+buttons.forEach((btn) => {
+  btn.addEventListener("click", () => {
+    currentTool = btn.dataset.tool;
+    updateToolbar();
+  });
+});
+
+function updateToolbar() {
+  buttons.forEach((btn) => {
+    btn.classList.toggle("active", btn.dataset.tool === currentTool);
+  });
+}
+
+// initialize
+updateToolbar();
+
 // Mouse + input state
 let isPanning = false;
 let spacePressed = false;
@@ -188,6 +206,30 @@ canvas.addEventListener("mousedown", (e) => {
       break;
     }
   }
+
+  // RECT TOOL → create instantly
+  if (currentTool === "rect") {
+    const mouse = screenToWorld(e.clientX, e.clientY);
+
+    const newRect = {
+      id: nextId++,
+      type: "rect",
+      x: mouse.x,
+      y: mouse.y,
+      w: 0,
+      h: 0,
+      color: randomColor(),
+    };
+
+    elements.push(newRect);
+    selectedElement = newRect;
+    isDragging = true;
+
+    dragOffset.x = 0;
+    dragOffset.y = 0;
+
+    return;
+  }
 });
 
 // Mouse up → stop panning
@@ -211,11 +253,18 @@ window.addEventListener("mousemove", (e) => {
     lastMouse.y = e.clientY;
   }
 
-  if (isDragging && selectedElement) {
+  if (isDragging && selectedElement && currentTool === "select") {
     const mouse = screenToWorld(e.clientX, e.clientY);
 
     selectedElement.x = mouse.x - dragOffset.x;
     selectedElement.y = mouse.y - dragOffset.y;
+  }
+
+  if (isDragging && selectedElement && currentTool === "rect") {
+    const mouse = screenToWorld(e.clientX, e.clientY);
+
+    selectedElement.w = mouse.x - selectedElement.x;
+    selectedElement.h = mouse.y - selectedElement.y;
   }
 
   if (isResizing && selectedElement) {
@@ -328,7 +377,8 @@ function saveFile() {
 
   const a = document.createElement("a");
   a.href = url;
-  a.download = "board.kj";
+  name = prompt("Enter file name:", "board.kj");
+  a.download = name;
   a.click();
 
   URL.revokeObjectURL(url);
