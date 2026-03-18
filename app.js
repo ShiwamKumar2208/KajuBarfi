@@ -12,6 +12,9 @@ let elements = [
 
 let nextId = 2;
 
+let isResizing = false;
+let resizeHandle = null; // "tl", "tr", "bl", "br"
+
 let selectedElement = null;
 let isDragging = false;
 let dragOffset = { x: 0, y: 0 };
@@ -80,6 +83,15 @@ canvas.addEventListener("mousedown", (e) => {
       mouse.y <= el.y + el.h
     ) {
       selectedElement = el;
+      if (selectedElement) {
+        const handle = getResizeHandle(selectedElement, mouse);
+
+        if (handle) {
+          isResizing = true;
+          resizeHandle = handle;
+          return;
+        }
+      }
       isDragging = true;
 
       dragOffset.x = mouse.x - el.x;
@@ -94,6 +106,8 @@ canvas.addEventListener("mousedown", (e) => {
 window.addEventListener("mouseup", () => {
   isPanning = false;
   isDragging = false;
+  isResizing = false;
+  resizeHandle = null;
 });
 
 // Mouse move → pan logic
@@ -114,6 +128,39 @@ window.addEventListener("mousemove", (e) => {
 
     selectedElement.x = mouse.x - dragOffset.x;
     selectedElement.y = mouse.y - dragOffset.y;
+  }
+
+  if (isResizing && selectedElement) {
+    const mouse = screenToWorld(e.clientX, e.clientY);
+    const el = selectedElement;
+
+    if (resizeHandle === "br") {
+      el.w = mouse.x - el.x;
+      el.h = mouse.y - el.y;
+    }
+
+    if (resizeHandle === "tr") {
+      el.w = mouse.x - el.x;
+      el.h = el.y + el.h - mouse.y;
+      el.y = mouse.y;
+    }
+
+    if (resizeHandle === "bl") {
+      el.w = el.x + el.w - mouse.x;
+      el.h = mouse.y - el.y;
+      el.x = mouse.x;
+    }
+
+    if (resizeHandle === "tl") {
+      el.w = el.x + el.w - mouse.x;
+      el.h = el.y + el.h - mouse.y;
+      el.x = mouse.x;
+      el.y = mouse.y;
+    }
+
+    // Prevent negative sizes
+    el.w = Math.max(20, el.w);
+    el.h = Math.max(20, el.h);
   }
 });
 
@@ -166,6 +213,31 @@ canvas.addEventListener("dblclick", (e) => {
   dragOffset.y = 50;
 });
 
+function getResizeHandle(el, mouse) {
+  const size = 10 / camera.zoom;
+
+  const handles = {
+    tl: { x: el.x, y: el.y },
+    tr: { x: el.x + el.w, y: el.y },
+    bl: { x: el.x, y: el.y + el.h },
+    br: { x: el.x + el.w, y: el.y + el.h },
+  };
+
+  for (let key in handles) {
+    const h = handles[key];
+    if (
+      mouse.x >= h.x - size &&
+      mouse.x <= h.x + size &&
+      mouse.y >= h.y - size &&
+      mouse.y <= h.y + size
+    ) {
+      return key;
+    }
+  }
+
+  return null;
+}
+
 function randomColor() {
   const colors = ["#4CAF50", "#2196F3", "#FF9800", "#E91E63", "#9C27B0"];
   return colors[Math.floor(Math.random() * colors.length)];
@@ -195,6 +267,23 @@ function draw() {
   requestAnimationFrame(draw);
 }
 
+function drawHandles(el) {
+  const size = 8 / camera.zoom;
+
+  const points = [
+    { x: el.x, y: el.y },
+    { x: el.x + el.w, y: el.y },
+    { x: el.x, y: el.y + el.h },
+    { x: el.x + el.w, y: el.y + el.h },
+  ];
+
+  ctx.fillStyle = "#fff";
+
+  points.forEach((p) => {
+    ctx.fillRect(p.x - size / 2, p.y - size / 2, size, size);
+  });
+}
+
 function drawElements() {
   elements.forEach((el) => {
     if (el.type === "rect") {
@@ -206,6 +295,8 @@ function drawElements() {
         ctx.strokeStyle = "#fff";
         ctx.lineWidth = 2 / camera.zoom;
         ctx.strokeRect(el.x, el.y, el.w, el.h);
+
+        drawHandles(el);
       }
     }
   });
