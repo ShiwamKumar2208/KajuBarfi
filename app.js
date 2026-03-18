@@ -70,6 +70,60 @@ window.addEventListener("keydown", (e) => {
     e.preventDefault();
     document.getElementById("fileInput").click();
   }
+
+  // DELETE selected
+  if (e.key === "Delete" || e.key === "Backspace") {
+    if (selectedElement && !editingText) {
+      elements = elements.filter((el) => el !== selectedElement);
+      selectedElement = null;
+    }
+  }
+
+  // DUPLICATE (Ctrl + D)
+  if (e.ctrlKey && e.key === "d") {
+    e.preventDefault();
+
+    if (selectedElement) {
+      const copy = JSON.parse(JSON.stringify(selectedElement));
+
+      copy.id = nextId++;
+      copy.x += 20;
+      copy.y += 20;
+
+      elements.push(copy);
+      selectedElement = copy;
+    }
+  }
+
+  // TOOL SWITCH
+  if (!editingText) {
+    if (e.key === "v") currentTool = "select";
+    if (e.key === "t") currentTool = "text";
+    if (e.key === "r") currentTool = "rect";
+  }
+
+  // Ctrl + ]
+  if (e.ctrlKey && e.key === "]") {
+    if (selectedElement) {
+      elements = elements.filter((el) => el !== selectedElement);
+      elements.push(selectedElement);
+    }
+  }
+
+  // Ctrl + [
+  if (e.ctrlKey && e.key === "[") {
+    if (selectedElement) {
+      elements = elements.filter((el) => el !== selectedElement);
+      elements.unshift(selectedElement);
+    }
+  }
+
+  if (e.key === "Escape") {
+    stopEditingText();
+    selectedElement = null;
+    isDragging = false;
+    isResizing = false;
+  }
 });
 
 // Resize handling
