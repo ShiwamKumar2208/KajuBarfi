@@ -10,6 +10,9 @@ let elements = [
   },
 ];
 
+let currentTool = "select"; // later for toolbar
+let editingText = null;
+
 let nextId = 2;
 
 let isResizing = false;
@@ -37,6 +40,16 @@ let camera = {
 let isPanning = false;
 let spacePressed = false;
 let lastMouse = { x: 0, y: 0 };
+
+const textarea = document.getElementById("textEditor");
+
+textarea.addEventListener("blur", stopEditingText);
+
+textarea.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") {
+    stopEditingText();
+  }
+});
 
 document.getElementById("fileInput").addEventListener("change", (e) => {
   const file = e.target.files[0];
@@ -214,24 +227,37 @@ canvas.addEventListener("dblclick", (e) => {
 
   const mouse = screenToWorld(e.clientX, e.clientY);
 
-  const newElement = {
+  // Check if clicking existing text → edit
+  for (let el of elements) {
+    if (el.type === "text") {
+      if (
+        mouse.x >= el.x &&
+        mouse.x <= el.x + 200 &&
+        mouse.y >= el.y - 30 &&
+        mouse.y <= el.y + 30
+      ) {
+        startEditingText(el);
+        return;
+      }
+    }
+  }
+
+  // Create new text
+  const newText = {
     id: nextId++,
-    type: "rect",
-    x: mouse.x - 75,
-    y: mouse.y - 50,
-    w: 150,
-    h: 100,
-    color: randomColor(),
+    type: "text",
+    x: mouse.x,
+    y: mouse.y,
+    text: "",
+    style: {
+      fontSize: 24,
+      fontFamily: "Arial",
+      color: "#ffffff",
+    },
   };
 
-  elements.push(newElement);
-
-  // Auto select + start dragging (feels smooth)
-  selectedElement = newElement;
-  isDragging = true;
-
-  dragOffset.x = 75;
-  dragOffset.y = 50;
+  elements.push(newText);
+  startEditingText(newText);
 });
 
 function saveFile() {
@@ -298,6 +324,38 @@ function getResizeHandle(el, mouse) {
   return null;
 }
 
+function startEditingText(el) {
+  const textarea = document.getElementById("textEditor");
+
+  editingText = el;
+
+  textarea.style.display = "block";
+  textarea.value = el.text;
+
+  const screenX = (el.x - camera.x) * camera.zoom;
+  const screenY = (el.y - camera.y) * camera.zoom;
+
+  textarea.style.left = screenX + "px";
+  textarea.style.top = screenY + "px";
+
+  textarea.style.fontSize = el.style.fontSize * camera.zoom + "px";
+  textarea.style.fontFamily = el.style.fontFamily;
+  textarea.style.color = el.style.color;
+
+  textarea.focus();
+}
+
+function stopEditingText() {
+  const textarea = document.getElementById("textEditor");
+
+  if (editingText) {
+    editingText.text = textarea.value;
+  }
+
+  textarea.style.display = "none";
+  editingText = null;
+}
+
 function randomColor() {
   const colors = ["#4CAF50", "#2196F3", "#FF9800", "#E91E63", "#9C27B0"];
   return colors[Math.floor(Math.random() * colors.length)];
@@ -358,6 +416,11 @@ function drawElements() {
 
         drawHandles(el);
       }
+    }
+    if (el.type === "text") {
+      ctx.fillStyle = el.style.color;
+      ctx.font = `${el.style.fontSize}px ${el.style.fontFamily}`;
+      ctx.fillText(el.text, el.x, el.y);
     }
   });
 }
