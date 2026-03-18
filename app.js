@@ -38,6 +38,27 @@ let isPanning = false;
 let spacePressed = false;
 let lastMouse = { x: 0, y: 0 };
 
+document.getElementById("fileInput").addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if (file) {
+    loadFile(file);
+  }
+});
+
+window.addEventListener("keydown", (e) => {
+  // Save (Ctrl + S)
+  if (e.ctrlKey && e.key === "s") {
+    e.preventDefault();
+    saveFile();
+  }
+
+  // Load (Ctrl + O)
+  if (e.ctrlKey && e.key === "o") {
+    e.preventDefault();
+    document.getElementById("fileInput").click();
+  }
+});
+
 // Resize handling
 window.addEventListener("resize", () => {
   canvas.width = window.innerWidth;
@@ -212,6 +233,45 @@ canvas.addEventListener("dblclick", (e) => {
   dragOffset.x = 75;
   dragOffset.y = 50;
 });
+
+function saveFile() {
+  const data = {
+    version: 1,
+    elements: elements,
+    camera: camera,
+  };
+
+  const json = JSON.stringify(data, null, 2);
+
+  const blob = new Blob([json], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "board.kj";
+  a.click();
+
+  URL.revokeObjectURL(url);
+}
+
+function loadFile(file) {
+  const reader = new FileReader();
+
+  reader.onload = function (e) {
+    try {
+      const data = JSON.parse(e.target.result);
+
+      elements = data.elements || [];
+      camera = data.camera || { x: 0, y: 0, zoom: 1 };
+
+      selectedElement = null;
+    } catch (err) {
+      alert("Invalid .kj file");
+    }
+  };
+
+  reader.readAsText(file);
+}
 
 function getResizeHandle(el, mouse) {
   const size = 10 / camera.zoom;
