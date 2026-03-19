@@ -10,11 +10,35 @@ let elements = [
   },
 ];
 
+// TODO: fix the save or other buttons
+// document.getElementById("save").addEventListener("click", () => saveFile(false));
+// document.getElementById("export").addEventListener("click", () => exportPNG());
+// document.getElementById("load").addEventListener("click", () => loadFile());
+
 let textEditing = {
   active: false,
   element: null,
   cursorPos: 0,
 };
+
+const actionButtons = document.querySelectorAll("#toolbar button[data-action]");
+
+actionButtons.forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const action = btn.dataset.action;
+
+    if (action === "save") saveFile(true);
+    if (action === "load") document.getElementById("fileInput").click();
+    if (action === "export") exportPNG();
+    if (action === "undo") undo();
+    if (action === "redo") redo();
+  });
+});
+
+let history = [];
+let historyIndex = -1;
+
+let currentStroke = null;
 
 let currentTool = "select"; // later for toolbar
 let editingText = null;
@@ -42,7 +66,8 @@ let camera = {
   zoom: 1,
 };
 
-const buttons = document.querySelectorAll("#toolbar button");
+// const buttons = document.querySelectorAll("#toolbar button");
+const buttons = document.querySelectorAll("#toolbar button[data-tool]");
 
 buttons.forEach((btn) => {
   btn.addEventListener("click", () => {
@@ -79,6 +104,18 @@ document.getElementById("fileInput").addEventListener("change", (e) => {
 textEditing.selectAll = false;
 
 window.addEventListener("keydown", (e) => {
+  // UNDO (Ctrl + Z)
+  if (e.ctrlKey && e.key.toLowerCase() === "z") {
+    e.preventDefault();
+    undo();
+  }
+
+  // REDO (Ctrl + Y)
+  if (e.ctrlKey && e.key.toLowerCase() === "y") {
+    e.preventDefault();
+    redo();
+  }
+
   // Save (Ctrl + S)
   // Ctrl+S → Save
   if (e.ctrlKey && e.key === "s") {
@@ -132,6 +169,7 @@ window.addEventListener("keydown", (e) => {
                 };
 
                 elements.push(newImage);
+                saveState();
                 selectedElement = newImage;
               };
 
@@ -211,6 +249,7 @@ window.addEventListener("keydown", (e) => {
           textEditing.cursorPos += clip.length;
         }
       });
+      saveState();
 
       return;
     }
@@ -267,6 +306,7 @@ window.addEventListener("keydown", (e) => {
     if (selectedElement && !editingText) {
       elements = elements.filter((el) => el !== selectedElement);
       selectedElement = null;
+      saveState();
     }
   }
 
@@ -281,8 +321,19 @@ window.addEventListener("keydown", (e) => {
       copy.x += 20;
       copy.y += 20;
 
+      // reviveElements([copy]);
+
+      // 🔥 FIX: restore image object
+      if (copy.type === "image" && copy.src) {
+        const img = new Image();
+        img.src = copy.src;
+        copy.img = img;
+      }
+
       elements.push(copy);
       selectedElement = copy;
+
+      saveState();
     }
   }
 
@@ -291,6 +342,8 @@ window.addEventListener("keydown", (e) => {
     if (e.key === "v") currentTool = "select";
     if (e.key === "t") currentTool = "text";
     if (e.key === "r") currentTool = "rect";
+    if (e.key === "s") currentTool = "sketch";
+    if (e.key === "e") currentTool = "eraser";
 
     updateToolbar(); // 🔥 ADD THIS
   }
@@ -300,6 +353,7 @@ window.addEventListener("keydown", (e) => {
     if (selectedElement) {
       elements = elements.filter((el) => el !== selectedElement);
       elements.push(selectedElement);
+      saveState();
     }
   }
 
@@ -308,6 +362,7 @@ window.addEventListener("keydown", (e) => {
     if (selectedElement) {
       elements = elements.filter((el) => el !== selectedElement);
       elements.unshift(selectedElement);
+      saveState();
     }
   }
 
@@ -372,6 +427,7 @@ canvas.addEventListener("drop", (e) => {
       };
 
       elements.push(newImage);
+      saveState();
       selectedElement = newImage;
     };
 
@@ -390,6 +446,84 @@ canvas.addEventListener("mousedown", (e) => {
     isPanning = true;
     lastMouse.x = e.clientX;
     lastMouse.y = e.clientY;
+    return;
+  }
+  if (currentTool === "erase") {
+    const mouse = screenToWorld(e.clientX, e.clientY);
+
+    for (let i = elements.length - 1; i >= 0; i--) {
+      const el = elements[i];
+
+      // 🔥 RECT
+      if (el.type === "rect") {
+        if (
+          mouse.x >= el.x &&
+          mouse.x <= el.x + el.w &&
+          mouse.y >= el.y &&
+          mouse.y <= el.y + el.h
+        ) {
+          elements.splice(i, 1);
+          saveState();
+          return;
+        }
+      }
+
+      // 🔥 TEXT
+      if (el.type === "text") {
+        const bounds = getTextBounds(el);
+
+        if (
+          mouse.x >= el.x &&
+          mouse.x <= el.x + bounds.w &&
+          mouse.y >= el.y &&
+          mouse.y <= el.y + bounds.h
+        ) {
+          elements.splice(i, 1);
+          saveState();
+          return;
+        }
+      }
+
+      // 🔥 IMAGE
+      if (el.type === "image") {
+        if (
+          mouse.x >= el.x &&
+          mouse.x <= el.x + el.w &&
+          mouse.y >= el.y &&
+          mouse.y <= el.y + el.h
+        ) {
+          elements.splice(i, 1);
+          saveState();
+          return;
+        }
+      }
+
+      // 🔥 SKETCH (simple version: delete whole stroke)
+      if (el.type === "sketch") {
+        for (let p of el.points) {
+          if (Math.abs(mouse.x - p.x) < 5 && Math.abs(mouse.y - p.y) < 5) {
+            elements.splice(i, 1);
+            saveState();
+            return;
+          }
+        }
+      }
+    }
+  }
+
+  if (currentTool === "sketch") {
+    const mouse = screenToWorld(e.clientX, e.clientY);
+
+    currentStroke = {
+      id: nextId++,
+      type: "sketch",
+      points: [mouse],
+      color: "#ffffff",
+      width: 2,
+    };
+
+    elements.push(currentStroke);
+    saveState();
     return;
   }
 
@@ -452,6 +586,7 @@ canvas.addEventListener("mousedown", (e) => {
     };
 
     elements.push(newText);
+    saveState();
     startEditingText(newText);
 
     return;
@@ -515,21 +650,50 @@ canvas.addEventListener("mousedown", (e) => {
 
 // Mouse up → stop panning
 window.addEventListener("mouseup", () => {
-  isPanning = false;
-  isDragging = false;
-  isResizing = false;
-  resizeHandle = null;
+  let actionOccurred = false;
 
+  // 🔥 HANDLE SKETCH FIRST (before nulling)
+  if (currentStroke) {
+    if (currentStroke.points.length < 2) {
+      elements = elements.filter((el) => el !== currentStroke);
+    } else {
+      actionOccurred = true;
+    }
+  }
+
+  // 🔥 HANDLE DRAG / RESIZE
+  if (isDragging || isResizing) {
+    actionOccurred = true;
+  }
+
+  // 🔥 HANDLE INVALID RECT (tiny)
   if (selectedElement && selectedElement.type === "rect") {
     if (Math.abs(selectedElement.w) < 5 || Math.abs(selectedElement.h) < 5) {
       elements = elements.filter((el) => el !== selectedElement);
       selectedElement = null;
+      actionOccurred = true;
     }
   }
+
+  // 🔥 SAVE STATE ONCE
+  if (actionOccurred) {
+    saveState();
+  }
+
+  // 🔥 RESET STATES (AFTER everything)
+  isPanning = false;
+  isDragging = false;
+  isResizing = false;
+  resizeHandle = null;
+  currentStroke = null;
 });
 
 // Mouse move → pan logic
 window.addEventListener("mousemove", (e) => {
+  if (currentTool === "sketch" && currentStroke) {
+    const mouse = screenToWorld(e.clientX, e.clientY);
+    currentStroke.points.push(mouse);
+  }
   if (isPanning) {
     const dx = (e.clientX - lastMouse.x) / camera.zoom;
     const dy = (e.clientY - lastMouse.y) / camera.zoom;
@@ -551,6 +715,7 @@ window.addEventListener("mousemove", (e) => {
 
     selectedElement.x = mouse.x - dragOffset.x;
     selectedElement.y = mouse.y - dragOffset.y;
+    saveState();
   }
 
   if (isDragging && selectedElement && currentTool === "rect") {
@@ -558,6 +723,7 @@ window.addEventListener("mousemove", (e) => {
 
     selectedElement.w = mouse.x - selectedElement.x;
     selectedElement.h = mouse.y - selectedElement.y;
+    saveState();
   }
 
   if (isResizing && selectedElement) {
@@ -600,6 +766,7 @@ window.addEventListener("mousemove", (e) => {
 
     el.w = Math.max(20, el.w);
     el.h = Math.max(20, el.h);
+    saveState();
   }
 });
 
@@ -632,6 +799,48 @@ canvas.addEventListener("dblclick", (e) => {
 
   saveFile(true);
 });
+
+function undo() {
+  if (historyIndex <= 0) return;
+
+  historyIndex--;
+
+  const state = JSON.parse(history[historyIndex]);
+
+  elements = JSON.parse(JSON.stringify(state.elements));
+  camera = JSON.parse(JSON.stringify(state.camera));
+
+  reviveElements(elements);
+
+  selectedElement = null;
+}
+
+function redo() {
+  if (historyIndex >= history.length - 1) return;
+
+  historyIndex++;
+
+  const state = JSON.parse(history[historyIndex]);
+
+  elements = JSON.parse(JSON.stringify(state.elements));
+  camera = JSON.parse(JSON.stringify(state.camera));
+
+  reviveElements(elements);
+
+  selectedElement = null;
+}
+
+function saveState() {
+  history = history.slice(0, historyIndex + 1);
+
+  const snapshot = JSON.stringify({
+    elements: JSON.parse(JSON.stringify(elements)),
+    camera: JSON.parse(JSON.stringify(camera)),
+  });
+
+  history.push(snapshot);
+  historyIndex++;
+}
 
 function exportPNG() {
   // Create temp canvas
@@ -670,7 +879,11 @@ function exportPNG() {
     }
 
     if (el.type === "image") {
-      exportCtx.drawImage(el.img, el.x, el.y, el.w, el.h);
+      ensureImage(el);
+
+      if (el.img && el.img.complete) {
+        exportCtx.drawImage(el.img, el.x, el.y, el.w, el.h);
+      }
     }
   });
 
@@ -682,6 +895,24 @@ function exportPNG() {
   link.download = downname.endsWith(".png") ? downname : downname + ".png";
   link.href = exportCanvas.toDataURL("image/png");
   link.click();
+}
+
+function reviveElements(elements) {
+  elements.forEach(el => {
+    if (el.type === "image" && el.src) {
+      const img = new Image();
+      img.src = el.src;
+      el.img = img;
+    }
+  });
+}
+
+function ensureImage(el) {
+  if (!el.img && el.src) {
+    const img = new Image();
+    img.src = el.src;
+    el.img = img;
+  }
 }
 
 function getTextBounds(el) {
@@ -724,11 +955,21 @@ function loadFile(file) {
   const reader = new FileReader();
 
   reader.onload = function (e) {
+    elements.forEach((el) => {
+      if (el.type === "image") {
+        const img = new Image();
+        img.src = el.src;
+        el.img = img;
+      }
+    });
+
     try {
       const data = JSON.parse(e.target.result);
 
       elements = data.elements || [];
       camera = data.camera || { x: 0, y: 0, zoom: 1 };
+
+      reviveElements(elements);
 
       selectedElement = null;
     } catch (err) {
@@ -837,6 +1078,22 @@ function drawHandles(el) {
 
 function drawElements() {
   elements.forEach((el) => {
+    if (el.type === "sketch") {
+      ctx.strokeStyle = el.color;
+      ctx.lineWidth = el.width / camera.zoom;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+
+      ctx.beginPath();
+
+      for (let i = 0; i < el.points.length; i++) {
+        const p = el.points[i];
+        if (i === 0) ctx.moveTo(p.x, p.y);
+        else ctx.lineTo(p.x, p.y);
+      }
+
+      ctx.stroke();
+    }
     if (el.type === "rect") {
       ctx.fillStyle = el.color;
       ctx.fillRect(el.x, el.y, el.w, el.h);
@@ -864,7 +1121,11 @@ function drawElements() {
       const img = new Image();
       img.src = el.src;
 
-      ctx.drawImage(img, el.x, el.y, el.w, el.h);
+      ensureImage(el);
+
+      if (el.img && el.img.complete) {
+        ctx.drawImage(el.img, el.x, el.y, el.w, el.h);
+      }
 
       if (selectedElement === el) {
         ctx.strokeStyle = "#fff";
@@ -946,6 +1207,21 @@ function drawGrid() {
     ctx.stroke();
   }
 }
+
+// 🔥 Initialize images (important for initial elements)
+elements.forEach((el) => {
+  if (el.type === "image" && !el.img) {
+    const img = new Image();
+    img.src = el.src;
+    el.img = img;
+  }
+});
+
+// 🔥 Save initial state ONCE
+saveState();
+
+// Start rendering
+draw();
 
 // Start
 draw();
