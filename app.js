@@ -1,12 +1,12 @@
 let elements = [
   {
     id: 1,
-    type: "rect",
+    type: "image",
     x: 100,
     y: 100,
     w: 200,
     h: 100,
-    color: "#4CAF50",
+    src: "./wel.png",
   },
 ];
 
@@ -86,6 +86,12 @@ window.addEventListener("keydown", (e) => {
     saveFile(false);
   }
 
+  // Ctrl + E → Export PNG
+  if (e.ctrlKey && e.key === "e") {
+    e.preventDefault();
+    exportPNG();
+  }
+
   // Ctrl+Shift+S → Save As
   if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "s") {
     e.preventDefault();
@@ -96,6 +102,47 @@ window.addEventListener("keydown", (e) => {
   if (e.ctrlKey && e.key === "o") {
     e.preventDefault();
     document.getElementById("fileInput").click();
+  }
+
+  if (e.ctrlKey && e.key.toLowerCase() === "v" && !textEditing.active) {
+    navigator.clipboard.read().then(async (items) => {
+      for (const item of items) {
+        for (const type of item.types) {
+          if (type.startsWith("image/")) {
+            const blob = await item.getType(type);
+            const reader = new FileReader();
+
+            reader.onload = function (event) {
+              const img = new Image();
+
+              img.onload = () => {
+                const center = screenToWorld(
+                  canvas.width / 2,
+                  canvas.height / 2,
+                );
+
+                const newImage = {
+                  id: nextId++,
+                  type: "image",
+                  x: center.x,
+                  y: center.y,
+                  w: img.width / 2,
+                  h: img.height / 2,
+                  src: event.target.result,
+                };
+
+                elements.push(newImage);
+                selectedElement = newImage;
+              };
+
+              img.src = event.target.result;
+            };
+
+            reader.readAsDataURL(blob);
+          }
+        }
+      }
+    });
   }
 
   if (textEditing.active && currentTool === "text") {
@@ -294,6 +341,44 @@ window.addEventListener("keyup", (e) => {
   if (e.code === "Space") {
     spacePressed = false;
   }
+});
+
+canvas.addEventListener("dragover", (e) => {
+  e.preventDefault();
+});
+
+canvas.addEventListener("drop", (e) => {
+  e.preventDefault();
+
+  const file = e.dataTransfer.files[0];
+  if (!file || !file.type.startsWith("image/")) return;
+
+  const reader = new FileReader();
+
+  reader.onload = function (event) {
+    const img = new Image();
+
+    img.onload = () => {
+      const mouse = screenToWorld(e.clientX, e.clientY);
+
+      const newImage = {
+        id: nextId++,
+        type: "image",
+        x: mouse.x,
+        y: mouse.y,
+        w: img.width / 2,
+        h: img.height / 2,
+        src: event.target.result,
+      };
+
+      elements.push(newImage);
+      selectedElement = newImage;
+    };
+
+    img.src = event.target.result;
+  };
+
+  reader.readAsDataURL(file);
 });
 
 // Mouse down → start panning if space OR middle mouse
@@ -548,6 +633,57 @@ canvas.addEventListener("dblclick", (e) => {
   saveFile(true);
 });
 
+function exportPNG() {
+  // Create temp canvas
+  console.log("Exporting PNG...");
+  const exportCanvas = document.createElement("canvas");
+  const exportCtx = exportCanvas.getContext("2d");
+
+  exportCanvas.width = canvas.width;
+  exportCanvas.height = canvas.height;
+
+  // Copy current view
+  exportCtx.fillStyle = "#111"; // background
+  exportCtx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
+
+  exportCtx.save();
+
+  // Apply same camera transform
+  exportCtx.scale(camera.zoom, camera.zoom);
+  exportCtx.translate(-camera.x, -camera.y);
+
+  // Draw elements
+  elements.forEach((el) => {
+    if (el.type === "rect") {
+      exportCtx.fillStyle = el.color;
+      exportCtx.fillRect(el.x, el.y, el.w, el.h);
+    }
+
+    if (el.type === "text") {
+      exportCtx.fillStyle = el.style.color;
+      exportCtx.font = `${el.style.fontSize}px ${el.style.fontFamily}`;
+
+      const lines = el.text.split("\n");
+      lines.forEach((line, i) => {
+        exportCtx.fillText(line, el.x, el.y + i * el.style.fontSize);
+      });
+    }
+
+    if (el.type === "image") {
+      exportCtx.drawImage(el.img, el.x, el.y, el.w, el.h);
+    }
+  });
+
+  exportCtx.restore();
+
+  // Download
+  const link = document.createElement("a");
+  downname = prompt("File name:", "kaju-export.png");
+  link.download = downname.endsWith(".png") ? downname : downname + ".png";
+  link.href = exportCanvas.toDataURL("image/png");
+  link.click();
+}
+
 function getTextBounds(el) {
   ctx.font = `${el.style.fontSize}px ${el.style.fontFamily}`;
 
@@ -721,6 +857,21 @@ function drawElements() {
         ctx.strokeRect(el.x, el.y, w, h);
 
         drawHandles({ x: el.x, y: el.y, w, h });
+      }
+    }
+
+    if (el.type === "image") {
+      const img = new Image();
+      img.src = el.src;
+
+      ctx.drawImage(img, el.x, el.y, el.w, el.h);
+
+      if (selectedElement === el) {
+        ctx.strokeStyle = "#fff";
+        ctx.lineWidth = 2 / camera.zoom;
+        ctx.strokeRect(el.x, el.y, el.w, el.h);
+
+        drawHandles(el);
       }
     }
 
