@@ -59,3 +59,16 @@ canvas {
 #toolbar button[data-action]:hover {
   background: #444;
 }
+
+.tooltip {
+  position: fixed;
+  background: #222;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.1s ease;
+  z-index: 1000;
+}

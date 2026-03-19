@@ -59,6 +59,29 @@ const ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
+const tooltip = document.createElement("div");
+tooltip.className = "tooltip";
+document.body.appendChild(tooltip);
+
+document.querySelectorAll("#toolbar button").forEach(btn => {
+  btn.addEventListener("mouseenter", (e) => {
+    const text = btn.getAttribute("ttip");
+    if (!text) return;
+
+    tooltip.textContent = text;
+    tooltip.style.opacity = 1;
+  });
+
+  btn.addEventListener("mousemove", (e) => {
+    tooltip.style.left = e.clientX + 10 + "px";
+    tooltip.style.top = e.clientY + 10 + "px";
+  });
+
+  btn.addEventListener("mouseleave", () => {
+    tooltip.style.opacity = 0;
+  });
+});
+
 // Camera (infinite canvas)
 let camera = {
   x: 0,
