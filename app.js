@@ -10,6 +10,12 @@ let elements = [
   },
 ];
 
+let textEditing = {
+  active: false,
+  element: null,
+  cursorPos: 0,
+};
+
 let currentTool = "select"; // later for toolbar
 let editingText = null;
 
@@ -61,16 +67,7 @@ let isPanning = false;
 let spacePressed = false;
 let lastMouse = { x: 0, y: 0 };
 
-// TODO: textarea is now good looking but not working properly, it should be fixed
 const textarea = document.getElementById("textEditor");
-
-textarea.addEventListener("blur", stopEditingText);
-
-textarea.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") {
-    stopEditingText();
-  }
-});
 
 document.getElementById("fileInput").addEventListener("change", (e) => {
   const file = e.target.files[0];
@@ -78,6 +75,8 @@ document.getElementById("fileInput").addEventListener("change", (e) => {
     loadFile(file);
   }
 });
+
+textEditing.selectAll = false;
 
 window.addEventListener("keydown", (e) => {
   // Save (Ctrl + S)
@@ -97,6 +96,123 @@ window.addEventListener("keydown", (e) => {
   if (e.ctrlKey && e.key === "o") {
     e.preventDefault();
     document.getElementById("fileInput").click();
+  }
+
+  if (textEditing.active && currentTool === "text") {
+    const el = textEditing.element;
+    const step = e.shiftKey ? 10 : 10; // Shift = faster movement
+
+    if (e.ctrlKey && e.code === "ArrowUp") {
+      selectedElement.y -= step;
+      e.preventDefault();
+    }
+
+    if (e.ctrlKey && e.code === "ArrowDown") {
+      selectedElement.y += step;
+      e.preventDefault();
+    }
+
+    if (e.ctrlKey && e.code === "ArrowLeft") {
+      selectedElement.x -= step;
+      e.preventDefault();
+    }
+
+    if (e.ctrlKey && e.code === "ArrowRight") {
+      selectedElement.x += step;
+      e.preventDefault();
+    }
+
+    // SELECT ALL
+    if (e.ctrlKey && e.key.toLowerCase() === "a") {
+      e.preventDefault();
+      textEditing.selectAll = true;
+      textEditing.cursorPos = el.text.length;
+      return;
+    }
+
+    // COPY
+    if (e.ctrlKey && e.key.toLowerCase() === "c") {
+      e.preventDefault();
+      navigator.clipboard.writeText(el.text);
+      return;
+    }
+
+    // CUT
+    if (e.ctrlKey && e.key.toLowerCase() === "x") {
+      e.preventDefault();
+      navigator.clipboard.writeText(el.text);
+      el.text = "";
+      textEditing.cursorPos = 0;
+      return;
+    }
+
+    // PASTE
+    if (e.ctrlKey && e.key.toLowerCase() === "v") {
+      e.preventDefault();
+
+      navigator.clipboard.readText().then((clip) => {
+        if (textEditing.selectAll) {
+          el.text = clip;
+          textEditing.cursorPos = clip.length;
+          textEditing.selectAll = false;
+        } else {
+          el.text =
+            el.text.slice(0, textEditing.cursorPos) +
+            clip +
+            el.text.slice(textEditing.cursorPos);
+
+          textEditing.cursorPos += clip.length;
+        }
+      });
+
+      return;
+    }
+
+    if (e.key.length === 1 && !e.ctrlKey) {
+      el.text =
+        el.text.slice(0, textEditing.cursorPos) +
+        e.key +
+        el.text.slice(textEditing.cursorPos);
+
+      textEditing.cursorPos++;
+    }
+
+    if (e.key === "Backspace") {
+      if (textEditing.cursorPos > 0) {
+        el.text =
+          el.text.slice(0, textEditing.cursorPos - 1) +
+          el.text.slice(textEditing.cursorPos);
+
+        textEditing.cursorPos--;
+      }
+    }
+
+    if (e.key === "Enter") {
+      el.text =
+        el.text.slice(0, textEditing.cursorPos) +
+        "\n" +
+        el.text.slice(textEditing.cursorPos);
+
+      textEditing.cursorPos++;
+    }
+
+    if (e.key === "Escape") {
+      stopEditingText();
+    }
+
+    if (e.ctrlKey && e.key === "=") {
+      selectedElement.style.fontSize += 2;
+    }
+
+    if (e.ctrlKey && e.key === "-") {
+      selectedElement.style.fontSize = Math.max(
+        10,
+        selectedElement.style.fontSize - 2,
+      );
+    }
+
+    e.preventDefault();
+    return;
   }
 
   // DELETE selected
@@ -150,7 +266,11 @@ window.addEventListener("keydown", (e) => {
 
   if (e.key === "Escape") {
     stopEditingText();
-    selectedElement = null;
+
+    currentTool = "select";
+    updateToolbar();
+
+    // selectedElement = null;
     isDragging = false;
     isResizing = false;
   }
@@ -188,6 +308,70 @@ canvas.addEventListener("mousedown", (e) => {
     return;
   }
 
+  if (currentTool === "text") {
+    const mouse = screenToWorld(e.clientX, e.clientY);
+
+    // Check if clicking existing text → edit
+    for (let el of elements) {
+      if (el.type === "text") {
+        ctx.font = `${el.style.fontSize}px ${el.style.fontFamily}`;
+
+        const lines = el.text.split("\n");
+        const width = Math.max(...lines.map((l) => ctx.measureText(l).width));
+        const height = lines.length * el.style.fontSize;
+
+        if (
+          mouse.x >= el.x &&
+          mouse.x <= el.x + width &&
+          mouse.y >= el.y &&
+          mouse.y <= el.y + height
+        ) {
+          selectedElement = el;
+
+          // 🔥 ONLY edit if text tool is active
+          if (currentTool === "text") {
+            startEditingText(el);
+            return;
+          }
+
+          // 🔥 OTHERWISE → allow resize or drag
+
+          const handle = getResizeHandle(el, mouse);
+          if (handle) {
+            isResizing = true;
+            resizeHandle = handle;
+            return;
+          }
+
+          isDragging = true;
+          dragOffset.x = mouse.x - el.x;
+          dragOffset.y = mouse.y - el.y;
+
+          break;
+        }
+      }
+    }
+
+    // Otherwise create new text
+    const newText = {
+      id: nextId++,
+      type: "text",
+      x: mouse.x,
+      y: mouse.y,
+      text: "",
+      style: {
+        fontSize: 24,
+        fontFamily: "Arial",
+        color: "#ffffff",
+      },
+    };
+
+    elements.push(newText);
+    startEditingText(newText);
+
+    return;
+  }
+
   // CHECK ELEMENT HIT (top to bottom)
   selectedElement = null;
 
@@ -217,30 +401,6 @@ canvas.addEventListener("mousedown", (e) => {
 
       break;
     }
-  }
-
-  // TODO: when i am in select tool and double click it should do nothhing(maybe something unique like setting zome to something )
-
-  if (currentTool === "text") {
-    const mouse = screenToWorld(e.clientX, e.clientY);
-
-    const newText = {
-      id: nextId++,
-      type: "text",
-      x: mouse.x,
-      y: mouse.y,
-      text: "",
-      style: {
-        fontSize: 24,
-        fontFamily: "Arial",
-        color: "#ffffff",
-      },
-    };
-
-    elements.push(newText);
-    startEditingText(newText);
-
-    return;
   }
 
   // RECT TOOL → create instantly
@@ -296,7 +456,12 @@ window.addEventListener("mousemove", (e) => {
     lastMouse.y = e.clientY;
   }
 
-  if (isDragging && selectedElement && currentTool === "select") {
+  if (
+    isDragging &&
+    selectedElement &&
+    currentTool === "select" &&
+    !textEditing.active
+  ) {
     const mouse = screenToWorld(e.clientX, e.clientY);
 
     selectedElement.x = mouse.x - dragOffset.x;
@@ -314,6 +479,16 @@ window.addEventListener("mousemove", (e) => {
     const mouse = screenToWorld(e.clientX, e.clientY);
     const el = selectedElement;
 
+    // 🔥 TEXT RESIZE
+    if (el.type === "text") {
+      if (resizeHandle === "br") {
+        const dy = mouse.y - el.y;
+        el.style.fontSize = Math.max(10, dy);
+      }
+      return;
+    }
+
+    // 🧱 RECT RESIZE (existing code)
     if (resizeHandle === "br") {
       el.w = mouse.x - el.x;
       el.h = mouse.y - el.y;
@@ -338,7 +513,6 @@ window.addEventListener("mousemove", (e) => {
       el.y = mouse.y;
     }
 
-    // Prevent negative sizes
     el.w = Math.max(20, el.w);
     el.h = Math.max(20, el.h);
   }
@@ -371,51 +545,18 @@ canvas.addEventListener("wheel", (e) => {
 canvas.addEventListener("dblclick", (e) => {
   if (spacePressed || isPanning) return;
 
-  const mouse = screenToWorld(e.clientX, e.clientY);
-
-  // Check if clicking existing text → edit
-  // TODO: text resize and drag is not as desired, needs work
-  for (let el of elements) {
-    if (el.type === "text") {
-      const width = ctx.measureText(el.text).width;
-      const height = el.style.fontSize;
-
-      if (
-        mouse.x >= el.x &&
-        mouse.x <= el.x + width &&
-        mouse.y <= el.y &&
-        mouse.y >= el.y - height
-      ) {
-        selectedElement = el;
-        isDragging = true;
-
-        dragOffset.x = mouse.x - el.x;
-        dragOffset.y = mouse.y - el.y;
-
-        break;
-      }
-    }
-  }
-
-  // Create new text
-  const newText = {
-    id: nextId++,
-    type: "text",
-    x: mouse.x,
-    y: mouse.y,
-    text: "",
-    style: {
-      fontSize: 24,
-      fontFamily: "Arial",
-      color: "#ffffff",
-    },
-  };
-
-  elements.push(newText);
-  startEditingText(newText);
+  saveFile(true);
 });
 
-// TODO: save function when called normally is saving normally but also as board.kj
+function getTextBounds(el) {
+  ctx.font = `${el.style.fontSize}px ${el.style.fontFamily}`;
+
+  const lines = el.text.split("\n");
+  const width = Math.max(...lines.map((l) => ctx.measureText(l).width));
+  const height = lines.length * el.style.fontSize;
+
+  return { w: width, h: height };
+}
 
 function saveFile(saveAs = false) {
   const data = {
@@ -462,23 +603,35 @@ function loadFile(file) {
   reader.readAsText(file);
 }
 
+// TODO: clean unused code such as the resizeable text box logic code which i changed with ctrl + arrow keys
+
 function getResizeHandle(el, mouse) {
   const size = 10 / camera.zoom;
 
+  let w = el.w;
+  let h = el.h;
+
+  // 🔥 FIX: handle text
+  if (el.type === "text") {
+    const bounds = getTextBounds(el);
+    w = bounds.w;
+    h = bounds.h;
+  }
+
   const handles = {
     tl: { x: el.x, y: el.y },
-    tr: { x: el.x + el.w, y: el.y },
-    bl: { x: el.x, y: el.y + el.h },
-    br: { x: el.x + el.w, y: el.y + el.h },
+    tr: { x: el.x + w, y: el.y },
+    bl: { x: el.x, y: el.y + h },
+    br: { x: el.x + w, y: el.y + h },
   };
 
   for (let key in handles) {
-    const h = handles[key];
+    const hnd = handles[key];
     if (
-      mouse.x >= h.x - size &&
-      mouse.x <= h.x + size &&
-      mouse.y >= h.y - size &&
-      mouse.y <= h.y + size
+      mouse.x >= hnd.x - size &&
+      mouse.x <= hnd.x + size &&
+      mouse.y >= hnd.y - size &&
+      mouse.y <= hnd.y + size
     ) {
       return key;
     }
@@ -488,35 +641,16 @@ function getResizeHandle(el, mouse) {
 }
 
 function startEditingText(el) {
-  const textarea = document.getElementById("textEditor");
+  textEditing.active = true;
+  textEditing.element = el;
+  textEditing.cursorPos = el.text.length;
 
-  editingText = el;
-
-  textarea.style.display = "block";
-  textarea.value = el.text;
-
-  const screenX = (el.x - camera.x) * camera.zoom;
-  const screenY = (el.y - camera.y) * camera.zoom;
-
-  textarea.style.left = screenX + "px";
-  textarea.style.top = screenY + "px";
-
-  textarea.style.fontSize = el.style.fontSize * camera.zoom + "px";
-  textarea.style.fontFamily = el.style.fontFamily;
-  textarea.style.color = el.style.color;
-
-  textarea.focus();
+  selectedElement = el;
 }
 
 function stopEditingText() {
-  const textarea = document.getElementById("textEditor");
-
-  if (editingText) {
-    editingText.text = textarea.value;
-  }
-
-  textarea.style.display = "none";
-  editingText = null;
+  textEditing.active = false;
+  textEditing.element = null;
 }
 
 function randomColor() {
@@ -573,17 +707,63 @@ function drawElements() {
 
       // Selection outline
       if (selectedElement === el) {
+        let w = el.w;
+        let h = el.h;
+
+        if (el.type === "text") {
+          const bounds = getTextBounds(el);
+          w = bounds.w;
+          h = bounds.h;
+        }
+
         ctx.strokeStyle = "#fff";
         ctx.lineWidth = 2 / camera.zoom;
-        ctx.strokeRect(el.x, el.y, el.w, el.h);
+        ctx.strokeRect(el.x, el.y, w, h);
 
-        drawHandles(el);
+        drawHandles({ x: el.x, y: el.y, w, h });
       }
     }
+
+    if (
+      textEditing.active &&
+      textEditing.element === el &&
+      textEditing.selectAll
+    ) {
+      const bounds = getTextBounds(el);
+
+      ctx.fillStyle = "rgba(100, 150, 255, 0.3)";
+      ctx.fillRect(el.x, el.y, bounds.w, bounds.h);
+    }
+
     if (el.type === "text") {
       ctx.fillStyle = el.style.color;
       ctx.font = `${el.style.fontSize}px ${el.style.fontFamily}`;
-      ctx.fillText(el.text, el.x, el.y);
+
+      const lines = el.text.split("\n");
+
+      lines.forEach((line, i) => {
+        ctx.fillText(line, el.x, el.y + i * el.style.fontSize);
+      });
+
+      // 🔥 CURSOR RENDERING (Step 4 goes HERE)
+      if (textEditing.active && textEditing.element === el) {
+        const beforeCursor = el.text.slice(0, textEditing.cursorPos);
+        const split = beforeCursor.split("\n");
+
+        const currentLine = split[split.length - 1];
+        const cursorX = el.x + ctx.measureText(currentLine).width;
+        const cursorY = el.y + (split.length - 1) * el.style.fontSize;
+
+        const time = Date.now();
+        if (Math.floor(time / 500) % 2 === 0) {
+          ctx.beginPath();
+          ctx.moveTo(cursorX, cursorY - el.style.fontSize);
+          ctx.lineTo(cursorX, cursorY + 4);
+          ctx.strokeStyle = "#fff";
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        }
+      }
     }
   });
 }
