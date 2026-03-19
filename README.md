@@ -21,6 +21,10 @@ A fast, local-first infinite canvas for sketching, designing, and organizing ide
 
 ## 🚀 Getting Started
 
+### Run Online
+
+Just open `kajubarfi.netlify.app` in your browser.
+
 ### Run locally
 
 Just open `index.html` in your browser.
@@ -36,7 +40,7 @@ No dependencies. No build tools.
 | Select    | `V`      | Select, move, and interact with elements |
 | Rectangle | `R`      | Draw rectangles                          |
 | Text      | `T`      | Create and edit text                     |
-| Sketch    | —        | Freehand drawing                         |
+| Sketch    | `S`      | Freehand drawing                         |
 
 ---
 
@@ -80,7 +84,6 @@ No dependencies. No build tools.
 #### Movement
 
 * `Ctrl + I/J/K/L` → Move text precisely
-* `Shift` → Faster movement
 
 ---
 
@@ -109,6 +112,7 @@ Custom JSON-based format storing:
 
 * No partial text selection
 * No group resize (yet)
+* Highlighting text do have some glitches
 * No layers panel
 * Browser cannot overwrite saved files (download limitation)
 
@@ -138,18 +142,12 @@ Contributions are welcome!
 
 ---
 
-## 💡 Development Philosophy
+## 💡 Development Philosophy (KISS)
 
 * Keep it fast
 * Keep it simple
 * Avoid unnecessary dependencies
 * Build for real usage, not just features
-
----
-
-## 📜 License
-
-MIT (or your choice)
 
 ---
 
