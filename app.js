@@ -1243,8 +1243,5 @@ elements.forEach((el) => {
 // 🔥 Save initial state ONCE
 saveState();
 
-// Start rendering
-draw();
-
 // Start
 draw();

@@ -1,3 +1,4 @@
+<!-- refactored code to main.js from app.js but app.js still exists to just get honoured for being legendary <3 -->
 <!doctype html>
 <html>
   <head>
@@ -12,6 +13,7 @@
       <button data-tool="text" ttip="Text">T</button>
       <button data-tool="sketch" ttip="Sketch">✏️</button>
       <button data-tool="eraser" ttip="Eraser">🧽</button>
+      <button data-action="image-url" ttip="Add Image URL">🖼️</button>
       <button data-action="load" ttip="Load">🔽</button>
       <button data-action="save" ttip="Save">💾</button>
       <button data-action="export" ttip="Export PNG">⏫</button>
@@ -19,8 +21,9 @@
       <button data-action="redo" ttip="Redo">↷</button>
     </div>
     <input type="file" id="fileInput" accept=".kj" hidden />
-    <canvas id="canvas"></canvas>
+    <canvas id="canvas" tabindex="0"></canvas>
     <textarea id="textEditor"></textarea>
-    <script src="app.js"></script>
+    <!-- <script type="module" src="src/main.js"></script> -->
+     <script type="module" src="app copy.js"></script>
   </body>
 </html>
