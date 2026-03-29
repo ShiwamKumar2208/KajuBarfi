@@ -3,22 +3,27 @@
 ![Preview](wel.png)
 
 ![Status](https://img.shields.io/badge/status-active-brightgreen)
-![No Dependencies](https://img.shields.io/badge/dependencies-none-blue)
+![Version](https://img.shields.io/badge/version-3.14.0-blue)
 ![Built With](https://img.shields.io/badge/built%20with-vanilla%20JS-yellow)
-![License](https://img.shields.io/badge/license-MIT-lightgrey)
 
 A fast, minimal, no-nonsense canvas-based whiteboard built from scratch.
 
 No frameworks. No backend. Just pure control.
 
----
+## 🧑‍💻 Run Online
 
-## 🚀 Demo
+just open https://kajubarfi.netlify.app/
 
-> ⚡ Open `index.html` directly in your browser  
-> (No setup, no install, no build step)
+## 🧑‍💻 Run Locally
 
----
+just open index.html
+
+No install. No dependencies.
+
+## 📦 Version
+
+Current version: **3.14.0**
+
 
 ## ✨ Features
 
@@ -29,7 +34,6 @@ No frameworks. No backend. Just pure control.
 - Eraser tool
 - Image support (URL + drag & drop)
 
----
 
 ### 🧠 Smart Interaction
 - Select, drag, and resize elements
@@ -38,7 +42,6 @@ No frameworks. No backend. Just pure control.
 - Duplicate elements (Ctrl + D)
 - Precise movement (Ctrl + Arrow keys)
 
----
 
 ### ⚡ Quick Actions UI
 - Floating toolbar near selected element
@@ -46,14 +49,12 @@ No frameworks. No backend. Just pure control.
   - 📋 Duplicate
   - 🔒 Lock / Unlock
 
----
 
 ### 🧭 Navigation
 - Scroll → Zoom (centered)
 - Space + Drag → Pan
 - Keyboard zoom support
 
----
 
 ### 🎨 Customization
 - Light / Dark theme toggle
@@ -61,22 +62,18 @@ No frameworks. No backend. Just pure control.
   - Square grid
   - Diamond ("barfi") grid
 
----
 
 ### 💾 File System
 - Save board → `.kj` file
 - Load board from file
 - Export as PNG
 
----
 
 ### 🖼 Image Handling
 - Drag & drop images directly
 - Add images via URL
 - Image duplication supported
 - Proper image restoration on load
-
----
 
 ## ⌨️ Keyboard Shortcuts
 
@@ -89,8 +86,6 @@ No frameworks. No backend. Just pure control.
 | S | Sketch |
 | E | Eraser |
 | Esc | Back to Select |
-
----
 
 ### Actions
 | Shortcut | Action |
@@ -105,15 +100,11 @@ No frameworks. No backend. Just pure control.
 | Ctrl + E | Export as png |
 | Ctrl + I | Import Image by URL |
 
----
-
 ### Movement
 | Shortcut | Action |
 |----------|--------|
 | Ctrl + Arrow | Move element |
 | Ctrl + Shift + Arrow | Faster move |
-
----
 
 ### Navigation
 | Action | Control |
@@ -121,16 +112,11 @@ No frameworks. No backend. Just pure control.
 | Zoom | Scroll |
 | Pan | Space + Drag |
 
----
-
 ## 🧱 Architecture
-
 
 src/ renderer/ → canvas rendering tools/ → tools (rect, sketch, text,
 select) utils/ → helpers (history, export, image, settings) input/ →
 keyboard handling
-
-------------------------------------------------------------------------
 
 ## ⚙️ Core Concepts
 
@@ -140,8 +126,6 @@ keyboard handling
 -   Undo / Redo history system
 -   Theme + grid abstraction
 
-------------------------------------------------------------------------
-
 ## 💡 Design Philosophy
 
 -   Keep it simple
@@ -149,15 +133,11 @@ keyboard handling
 -   Avoid unnecessary abstraction
 -   Full control over behavior
 
-------------------------------------------------------------------------
-
 ## ⚠️ Limitations
 
 -   No multi-select (yet)
 -   No backend sync
 -   Text system is intentionally simple
-
-------------------------------------------------------------------------
 
 ## 🛠 Future Ideas
 
@@ -167,28 +147,13 @@ keyboard handling
 -   Grouping system
 -   Auto-save (local storage) "maybe not since I don't like it"
 
-------------------------------------------------------------------------
-
-## 🧑‍💻 Run Online
-
-just open https://kajubarfi.netlify.app/
-
-------------------------------------------------------------------------
-
-## 🧑‍💻 Run Locally
-
-just open index.html
-
-No install. No dependencies.
-
-------------------------------------------------------------------------
 
 ## 📌 Status
 
 Actively evolving --- already usable as a lightweight whiteboard.
 
-------------------------------------------------------------------------
-
 ## 🟨 Why "Kaju Barfi"?
 
 Because I like Kaju Barfi.
+
+![Preview](logo.png)
