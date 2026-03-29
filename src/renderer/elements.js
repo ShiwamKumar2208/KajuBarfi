@@ -1,21 +1,26 @@
 import { state } from "../state.js";
 import { ensureImage } from "../utils/image.js";
+import { getThemeColors } from "../utils/settings.js";
 
 const ENABLE_TEXT_WRAP = true;
 
 function drawSelection(ctx, el, zoom) {
+  const colors = getThemeColors();
+
   const x1 = Math.min(el.x, el.x + el.w);
   const y1 = Math.min(el.y, el.y + el.h);
   const w = Math.abs(el.w);
   const h = Math.abs(el.h);
 
-  // outline
-  ctx.strokeStyle = "#fff";
-  ctx.lineWidth = 2 / zoom;
+  // 🔥 OUTLINE
+  ctx.strokeStyle = colors.selection;
+  ctx.lineWidth = Math.max(1, 2 / zoom);
+  ctx.setLineDash([6 / zoom, 4 / zoom]); // dashed like pro tools
   ctx.strokeRect(x1, y1, w, h);
+  ctx.setLineDash([]); // reset
 
-  // handles
-  const size = 8 / zoom;
+  // 🔥 HANDLES
+  const size = Math.max(6, 8 / zoom);
 
   const corners = [
     { x: x1, y: y1 },
@@ -24,10 +29,19 @@ function drawSelection(ctx, el, zoom) {
     { x: x1 + w, y: y1 + h },
   ];
 
-  ctx.fillStyle = "#fff";
-
   corners.forEach((p) => {
+    // outer border (contrast)
+    ctx.fillStyle = colors.bg;
     ctx.fillRect(p.x - size / 2, p.y - size / 2, size, size);
+
+    // inner square
+    ctx.fillStyle = colors.handle;
+    ctx.fillRect(
+      p.x - size / 2 + 2 / zoom,
+      p.y - size / 2 + 2 / zoom,
+      size - 4 / zoom,
+      size - 4 / zoom
+    );
   });
 }
 
@@ -41,7 +55,8 @@ export function drawElements(ctx) {
 
     // SKETCH
     if (el.type === "sketch") {
-      ctx.strokeStyle = el.color;
+      const colors = getThemeColors();
+      ctx.strokeStyle = el.color || colors.stroke;
       ctx.lineWidth = el.width / state.camera.zoom;
 
       ctx.beginPath();
@@ -63,7 +78,8 @@ export function drawElements(ctx) {
 
     // TEXT
     if (el.type === "text") {
-      ctx.fillStyle = el.style.color;
+      const colors = getThemeColors();
+      ctx.fillStyle = el.style.color || colors.text;
 
       const fontSize = Math.max(12, Math.abs(el.h));
       ctx.font = `${fontSize}px ${el.style.fontFamily}`;

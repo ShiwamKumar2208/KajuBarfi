@@ -1,27 +1,55 @@
 import { state } from "../state.js";
+import { getSettings } from "../utils/settings.js";
+import { getThemeColors } from "../utils/settings.js";
 
 export function drawGrid(ctx, canvas) {
+  const { grid } = getSettings();
+
   const size = 50;
 
-  ctx.strokeStyle = "#222";
+  const zoom = state.camera.zoom;
+  const offsetX = state.camera.x;
+  const offsetY = state.camera.y;
 
-  const startX = Math.floor(state.camera.x / size) * size;
-  const endX = startX + canvas.width / state.camera.zoom + size;
+  const colors = getThemeColors();
+  ctx.strokeStyle = colors.grid;
+  ctx.lineWidth = 1 / zoom;
 
-  const startY = Math.floor(state.camera.y / size) * size;
-  const endY = startY + canvas.height / state.camera.zoom + size;
+  const width = canvas.width / zoom;
+  const height = canvas.height / zoom;
 
-  for (let x = startX; x < endX; x += size) {
-    ctx.beginPath();
-    ctx.moveTo(x, startY);
-    ctx.lineTo(x, endY);
-    ctx.stroke();
+  const startX = Math.floor(offsetX / size) * size;
+  const startY = Math.floor(offsetY / size) * size;
+
+  if (grid === "square") {
+    for (let x = startX; x < offsetX + width; x += size) {
+      ctx.beginPath();
+      ctx.moveTo(x, offsetY);
+      ctx.lineTo(x, offsetY + height);
+      ctx.stroke();
+    }
+
+    for (let y = startY; y < offsetY + height; y += size) {
+      ctx.beginPath();
+      ctx.moveTo(offsetX, y);
+      ctx.lineTo(offsetX + width, y);
+      ctx.stroke();
+    }
   }
 
-  for (let y = startY; y < endY; y += size) {
-    ctx.beginPath();
-    ctx.moveTo(startX, y);
-    ctx.lineTo(endX, y);
-    ctx.stroke();
+  if (grid === "diamond") {
+    for (let x = startX - height; x < offsetX + width + height; x += size) {
+      ctx.beginPath();
+      ctx.moveTo(x, offsetY);
+      ctx.lineTo(x + height, offsetY + height);
+      ctx.stroke();
+    }
+
+    for (let x = startX; x < offsetX + width + height; x += size) {
+      ctx.beginPath();
+      ctx.moveTo(x, offsetY);
+      ctx.lineTo(x - height, offsetY + height);
+      ctx.stroke();
+    }
   }
 }

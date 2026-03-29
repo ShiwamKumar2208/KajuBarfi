@@ -12,7 +12,7 @@ export const sketchTool = {
       id: state.nextId++,
       type: "sketch",
       points: [mouse],
-      color: "#fff",
+      color: null,
       width: 2,
     };
 

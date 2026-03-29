@@ -49,7 +49,7 @@ export const textTool = {
       style: {
         fontSize: 24,
         fontFamily: "Arial",
-        color: "#fff",
+        color: null,
       },
     };
 
