@@ -72,3 +72,26 @@ canvas {
   transition: opacity 0.1s ease;
   z-index: 1000;
 }
+
+
+
+
+
+
+
+
+
+/*  New code for app copy */
+body.light {
+  background: #f5f5f5;
+  color: #111;
+}
+
+body.light #toolbar {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+body.light .tooltip {
+  background: #ddd;
+  color: #000;
+}
