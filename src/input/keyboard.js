@@ -24,13 +24,6 @@ export function setupKeyboard() {
         e.preventDefault();
       }
 
-      // 🔥 LOCK / UNLOCK (Ctrl + L)
-      if (key === "l" && state.selectedElement) {
-        state.selectedElement.locked = !state.selectedElement.locked;
-        saveState();
-        return;
-      }
-
       // 🔥 LOCK / UNLOCK (Ctrl + M)
       if (key === "m" && state.selectedElement) {
         state.selectedElement.locked = !state.selectedElement.locked;
