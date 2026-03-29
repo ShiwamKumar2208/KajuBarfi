@@ -1,6 +1,8 @@
 import { state } from "../state.js";
 import { ensureImage } from "../utils/image.js";
 
+const ENABLE_TEXT_WRAP = true;
+
 function drawSelection(ctx, el, zoom) {
   const x1 = Math.min(el.x, el.x + el.w);
   const y1 = Math.min(el.y, el.y + el.h);
@@ -62,11 +64,54 @@ export function drawElements(ctx) {
     // TEXT
     if (el.type === "text") {
       ctx.fillStyle = el.style.color;
-      ctx.font = `${el.style.fontSize}px ${el.style.fontFamily}`;
 
-      el.text.split("\n").forEach((line, i) => {
-        ctx.fillText(line, el.x, el.y + i * el.style.fontSize);
+      const fontSize = Math.max(12, Math.abs(el.h));
+      ctx.font = `${fontSize}px ${el.style.fontFamily}`;
+      ctx.textBaseline = "top";
+
+      const maxWidth = ENABLE_TEXT_WRAP ? Math.abs(el.w) || 200 : Infinity;
+
+      function wrapText(text, maxWidth) {
+        const words = text.split(" ");
+        const lines = [];
+        let currentLine = words[0] || "";
+
+        for (let i = 1; i < words.length; i++) {
+          const word = words[i];
+          const testLine = currentLine + " " + word;
+          const width = ctx.measureText(testLine).width;
+
+          if (width < maxWidth) {
+            currentLine = testLine;
+          } else {
+            lines.push(currentLine);
+            currentLine = word;
+          }
+        }
+
+        lines.push(currentLine);
+        return lines;
+      }
+
+      const rawLines = el.text.split("\n");
+      let lines = [];
+
+      rawLines.forEach((line) => {
+        lines.push(...wrapText(line, maxWidth));
       });
+
+      lines.forEach((line, i) => {
+        ctx.fillText(line, el.x, el.y + i * fontSize);
+      });
+
+      // 🔥 update bounds
+      const widest = Math.max(
+        ...lines.map((line) => ctx.measureText(line).width),
+        0,
+      );
+
+      el.w = widest;
+      el.h = fontSize * lines.length;
     }
 
     if (state.selectedElement === el) {

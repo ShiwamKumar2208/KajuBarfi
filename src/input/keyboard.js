@@ -26,9 +26,31 @@ export function setupKeyboard() {
     if (e.key === "Delete" || e.key === "Backspace") {
       if (state.selectedElement) {
         state.elements = state.elements.filter(
-          (el) => el !== state.selectedElement
+          (el) => el !== state.selectedElement,
         );
         state.selectedElement = null;
+        saveState();
+      }
+    }
+
+    // 🔥 BRING FORWARD (Ctrl + ])
+    if (e.ctrlKey && e.key === "]") {
+      if (state.selectedElement) {
+        state.elements = state.elements.filter(
+          (el) => el !== state.selectedElement,
+        );
+        state.elements.push(state.selectedElement);
+        saveState();
+      }
+    }
+
+    // 🔥 SEND BACKWARD (Ctrl + [)
+    if (e.ctrlKey && e.key === "[") {
+      if (state.selectedElement) {
+        state.elements = state.elements.filter(
+          (el) => el !== state.selectedElement,
+        );
+        state.elements.unshift(state.selectedElement);
         saveState();
       }
     }
