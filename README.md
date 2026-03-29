@@ -1,158 +1,194 @@
-# 🍬 Kaju Barfi — Infinite Canvas App
+# 🟨 Kaju Barfi - Infinite Canvas App
 
-A fast, local-first infinite canvas for sketching, designing, and organizing ideas with zero limits and full control.
+![Preview](wel.png)
+
+![Status](https://img.shields.io/badge/status-active-brightgreen)
+![No Dependencies](https://img.shields.io/badge/dependencies-none-blue)
+![Built With](https://img.shields.io/badge/built%20with-vanilla%20JS-yellow)
+![License](https://img.shields.io/badge/license-MIT-lightgrey)
+
+A fast, minimal, no-nonsense canvas-based whiteboard built from scratch.
+
+No frameworks. No backend. Just pure control.
+
+---
+
+## 🚀 Demo
+
+> ⚡ Open `index.html` directly in your browser  
+> (No setup, no install, no build step)
 
 ---
 
 ## ✨ Features
 
-* 🖥️ Infinite canvas with smooth pan & zoom
-* 🧱 Rectangle elements
-* 🔤 Text editing (custom engine, no HTML textarea)
-* 🖼️ Image support (drag & drop + paste)
-* ✏️ Sketch tool (freehand drawing)
-* 🧠 Multiselect (drag to select multiple elements)
-* 🔁 Undo / Redo system
-* 💾 Save / Load (`.kj` custom format)
-* 📤 Export canvas as PNG
-* 🎯 Keyboard-driven workflow
+### 🎨 Drawing Tools
+- Rectangle tool (with color editing)
+- Freehand sketch tool
+- Text tool (prompt-based editing)
+- Eraser tool
+- Image support (URL + drag & drop)
 
 ---
 
-## 🚀 Getting Started
-
-### Run Online
-
-Just open `kajubarfi.netlify.app` in your browser.
-
-### Run locally
-
-Just open `index.html` in your browser.
-
-No dependencies. No build tools.
+### 🧠 Smart Interaction
+- Select, drag, and resize elements
+- 4-corner resize system
+- Lock / unlock elements (Ctrl + L)
+- Duplicate elements (Ctrl + D)
+- Precise movement (Ctrl + Arrow keys)
 
 ---
 
-## 🧰 Tools
-
-| Tool      | Shortcut | Description                              |
-| --------- | -------- | ---------------------------------------- |
-| Select    | `V`      | Select, move, and interact with elements |
-| Rectangle | `R`      | Draw rectangles                          |
-| Text      | `T`      | Create and edit text                     |
-| Sketch    | `S`      | Freehand drawing                         |
+### ⚡ Quick Actions UI
+- Floating toolbar near selected element
+  - 🗑 Delete
+  - 📋 Duplicate
+  - 🔒 Lock / Unlock
 
 ---
 
-## 🎮 Controls
-
-### 🖱️ Mouse
-
-* Click → select element
-* Drag → move element
-* Drag empty space → multiselect
-* Middle click / Space + drag → pan
-* Scroll → zoom
+### 🧭 Navigation
+- Scroll → Zoom (centered)
+- Space + Drag → Pan
+- Keyboard zoom support
 
 ---
 
-### ⌨️ Keyboard
-
-#### General
-
-* `Ctrl + S` → Save
-* `Ctrl + Shift + S` → Save As
-* `Ctrl + O` → Load
-* `Ctrl + E` → Export PNG
-
-#### Editing
-
-* `Ctrl + Z` → Undo
-* `Ctrl + Y` → Redo
-* `Delete` → Delete selected element
-* `Ctrl + D` → Duplicate
-
-#### Text Editing
-
-* `Ctrl + A` → Select all text
-* `Ctrl + C` → Copy
-* `Ctrl + X` → Cut
-* `Ctrl + V` → Paste
-* `Enter` → New line
-* `Esc` → Exit text mode
-
-#### Movement
-
-* `Ctrl + I/J/K/L` → Move text precisely
+### 🎨 Customization
+- Light / Dark theme toggle
+- Grid modes:
+  - Square grid
+  - Diamond ("barfi") grid
 
 ---
 
-## 💾 File System
-
-### `.kj` Format
-
-Custom JSON-based format storing:
-
-* Elements (text, shapes, images, sketches)
-* Canvas state (position, zoom)
+### 💾 File System
+- Save board → `.kj` file
+- Load board from file
+- Export as PNG
 
 ---
 
-## 🧠 Architecture
-
-* Canvas-based rendering engine
-* Element-driven system (rect, text, image, sketch)
-* Snapshot-based undo/redo
-* Local-first design (no backend)
-* Custom text editing system
+### 🖼 Image Handling
+- Drag & drop images directly
+- Add images via URL
+- Image duplication supported
+- Proper image restoration on load
 
 ---
 
-## ⚠️ Known Limitations
+## ⌨️ Keyboard Shortcuts
 
-* No partial text selection
-* No group resize (yet)
-* Highlighting text do have some glitches
-* No layers panel
-* Browser cannot overwrite saved files (download limitation)
-
----
-
-## 🛣️ Roadmap
-
-* Group transformations
-* Arrow/link connections
-* Snap to grid
-* UI polish
-* Desktop version (Tauri)
+### Tools
+| Key | Action |
+|-----|--------|
+| V | Select |
+| R | Rectangle |
+| T | Text |
+| S | Sketch |
+| E | Eraser |
+| Esc | Back to Select |
 
 ---
 
-## 🤝 Contributing
-
-Contributions are welcome!
-
-### How to contribute
-
-1. Fork the repo
-2. Create a new branch (`feature/your-feature`)
-3. Make changes
-4. Commit clearly
-5. Open a pull request
-
----
-
-## 💡 Development Philosophy (KISS)
-
-* Keep it fast
-* Keep it simple
-* Avoid unnecessary dependencies
-* Build for real usage, not just features
+### Actions
+| Shortcut | Action |
+|----------|--------|
+| Ctrl + D | Duplicate |
+| Ctrl + M | Lock / Unlock |
+| Delete / Backspace | Delete |
+| Ctrl + Z | Undo |
+| Ctrl + Y | Redo |
+| Ctrl + O | Open .kj file |
+| Ctrl + S | Save |
+| Ctrl + E | Export as png |
+| Ctrl + I | Import Image by URL |
 
 ---
 
-## 🔥 Final Note
-
-This project is built from scratch to explore how real canvas-based tools work under the hood.
+### Movement
+| Shortcut | Action |
+|----------|--------|
+| Ctrl + Arrow | Move element |
+| Ctrl + Shift + Arrow | Faster move |
 
 ---
+
+### Navigation
+| Action | Control |
+|--------|--------|
+| Zoom | Scroll |
+| Pan | Space + Drag |
+
+---
+
+## 🧱 Architecture
+
+
+src/ renderer/ → canvas rendering tools/ → tools (rect, sketch, text,
+select) utils/ → helpers (history, export, image, settings) input/ →
+keyboard handling
+
+------------------------------------------------------------------------
+
+## ⚙️ Core Concepts
+
+-   State-driven rendering
+-   Canvas-based UI
+-   No DOM-based element system
+-   Undo / Redo history system
+-   Theme + grid abstraction
+
+------------------------------------------------------------------------
+
+## 💡 Design Philosophy
+
+-   Keep it simple
+-   Keep it fast
+-   Avoid unnecessary abstraction
+-   Full control over behavior
+
+------------------------------------------------------------------------
+
+## ⚠️ Limitations
+
+-   No multi-select (yet)
+-   No backend sync
+-   Text system is intentionally simple
+
+------------------------------------------------------------------------
+
+## 🛠 Future Ideas
+
+-   Box selection (multi-select)
+-   Snap to grid / alignment guides
+-   Color picker UI
+-   Grouping system
+-   Auto-save (local storage) "maybe not since I don't like it"
+
+------------------------------------------------------------------------
+
+## 🧑‍💻 Run Online
+
+just open https://kajubarfi.netlify.app/
+
+------------------------------------------------------------------------
+
+## 🧑‍💻 Run Locally
+
+just open index.html
+
+No install. No dependencies.
+
+------------------------------------------------------------------------
+
+## 📌 Status
+
+Actively evolving --- already usable as a lightweight whiteboard.
+
+------------------------------------------------------------------------
+
+## 🟨 Why "Kaju Barfi"?
+
+Because I like Kaju Barfi.
