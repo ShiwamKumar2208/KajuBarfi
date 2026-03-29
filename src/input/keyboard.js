@@ -1,5 +1,6 @@
 import { state } from "../state.js";
 import { undo, redo, saveState } from "../utils/history.js";
+import { ensureImage } from "../utils/image.js";
 import { updateToolbar } from "../utils/ui.js";
 
 export function setupKeyboard() {
@@ -21,6 +22,20 @@ export function setupKeyboard() {
         key.startsWith("arrow")
       ) {
         e.preventDefault();
+      }
+
+      // 🔥 LOCK / UNLOCK (Ctrl + L)
+      if (key === "l" && state.selectedElement) {
+        state.selectedElement.locked = !state.selectedElement.locked;
+        saveState();
+        return;
+      }
+
+      // 🔥 LOCK / UNLOCK (Ctrl + M)
+      if (key === "m" && state.selectedElement) {
+        state.selectedElement.locked = !state.selectedElement.locked;
+        saveState();
+        return;
       }
 
       // 🔥 UNDO / REDO
@@ -54,7 +69,7 @@ export function setupKeyboard() {
       // 🔥 Z-INDEX
       if (key === "]" && state.selectedElement) {
         state.elements = state.elements.filter(
-          (el) => el !== state.selectedElement
+          (el) => el !== state.selectedElement,
         );
         state.elements.push(state.selectedElement);
         saveState();
@@ -63,9 +78,34 @@ export function setupKeyboard() {
 
       if (key === "[" && state.selectedElement) {
         state.elements = state.elements.filter(
-          (el) => el !== state.selectedElement
+          (el) => el !== state.selectedElement,
         );
         state.elements.unshift(state.selectedElement);
+        saveState();
+        return;
+      }
+
+      // 🔥 DUPLICATE (Ctrl + D)
+      if (key === "d" && state.selectedElement) {
+        const el = state.selectedElement;
+
+        const copy = JSON.parse(JSON.stringify(el));
+
+        copy.id = state.nextId++;
+        copy.x += 20;
+        copy.y += 20;
+
+        // 🔥 FIX IMAGE
+        if (copy.type === "image") {
+          copy.img = null;
+          ensureImage(copy);
+        }
+
+        state.elements.push(copy);
+        state.selectedElement = copy;
+
+        e.preventDefault();
+
         saveState();
         return;
       }
@@ -117,7 +157,7 @@ export function setupKeyboard() {
     if (key === "delete" || key === "backspace") {
       if (state.selectedElement) {
         state.elements = state.elements.filter(
-          (el) => el !== state.selectedElement
+          (el) => el !== state.selectedElement,
         );
         state.selectedElement = null;
         saveState();

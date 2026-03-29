@@ -18,12 +18,98 @@
       <button data-action="load" ttip="Load">🔽</button>
       <button data-action="save" ttip="Save">💾</button>
       <button data-action="export" ttip="Export PNG">⏫</button>
+      <!-- <button data-action="share" ttip="Share Board">🔗</button>  might add something like this in the future -->
       <button data-action="undo" ttip="Undo">↶</button>
       <button data-action="redo" ttip="Redo">↷</button>
+      <button id="helpBtn" ttip="Help">❓</button>
     </div>
     <input type="file" id="fileInput" accept=".kj" hidden />
     <canvas id="canvas" tabindex="0"></canvas>
     <textarea id="textEditor"></textarea>
+    <div id="helpModal" class="help-modal hidden">
+      <div class="help-content">
+        <button id="closeHelp">✖</button>
+
+        <h1>Kaju Board Guide</h1>
+        <p class="help-sub">
+          Everything you need to use this board efficiently.
+        </p>
+
+        <section>
+          <h3>🛠 Tools</h3>
+          <ul>
+            <li><b>V</b> → Select / Move</li>
+            <li><b>R</b> → Rectangle</li>
+            <li><b>T</b> → Text</li>
+            <li><b>S</b> → Sketch (free draw)</li>
+            <li><b>E</b> → Eraser</li>
+          </ul>
+        </section>
+
+        <section>
+          <h3>🖱 Interaction</h3>
+          <ul>
+            <li>Drag → Move element</li>
+            <li>Drag corners → Resize</li>
+            <li>Click → Select</li>
+            <li>Delete / Backspace → Remove</li>
+          </ul>
+        </section>
+
+        <section>
+          <h3>⚡ Shortcuts</h3>
+          <ul>
+            <li><b>Ctrl + D</b> → Duplicate</li>
+            <li><b>Ctrl + M</b> → Lock Movement / Unlock Movement</li>
+            <li><b>Ctrl + Arrow</b> → Move precisely</li>
+            <li><b>Shift + Ctrl + Arrow</b> → Faster move</li>
+            <li><b>Ctrl + Z / Y</b> → Undo / Redo</li>
+            <li><b>Esc</b> → Back to Select tool</li>
+          </ul>
+        </section>
+
+        <section>
+          <h3>🧭 Navigation</h3>
+          <ul>
+            <li>Scroll → Zoom</li>
+            <li>Space + Drag → Pan</li>
+          </ul>
+        </section>
+
+        <section>
+          <h3>🎨 Extras</h3>
+          <ul>
+            <li>Ctrl + Click (Rectangle) → Change color</li>
+            <li>Drag & Drop → Add image</li>
+            <li>🖼 Button → Add image via URL</li>
+            <li>🔒 Locked elements cannot be moved or resized</li>
+          </ul>
+        </section>
+
+        <section>
+          <h3>💾 Files</h3>
+          <ul>
+            <li>Save → Downloads a .kj file</li>
+            <li>Load → Restore previous board</li>
+            <li>Export → Save as PNG</li>
+          </ul>
+        </section>
+
+        <section class="tip">
+          <h3>💡 Tips</h3>
+          <ul>
+            <li>Use duplicate (Ctrl + D) instead of redrawing</li>
+            <li>Lock background elements to avoid accidental movement</li>
+            <li>Use zoom + pan for large boards</li>
+          </ul>
+        </section>
+      </div>
+    </div>
+    <div id="quickActions" class="quick-actions">
+      <button id="qaDelete">🗑</button>
+      <button id="qaDuplicate">📋</button>
+      <button id="qaLock">🔒</button>
+    </div>
     <script type="module" src="app.js"></script>
   </body>
 </html>

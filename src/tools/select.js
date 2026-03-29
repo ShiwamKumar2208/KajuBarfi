@@ -19,7 +19,6 @@ function getBounds(el) {
 
 function isInside(el, mouse) {
   const { x1, x2, y1, y2 } = getBounds(el);
-
   return mouse.x >= x1 && mouse.x <= x2 && mouse.y >= y1 && mouse.y <= y2;
 }
 
@@ -49,12 +48,19 @@ export const selectTool = {
     const mouse = screenToWorld(e.clientX, e.clientY);
 
     state.selectedElement = null;
+    window.updateQuickActions?.();
 
     for (let i = state.elements.length - 1; i >= 0; i--) {
       const el = state.elements[i];
 
       if (isInside(el, mouse)) {
         state.selectedElement = el;
+        window.updateQuickActions?.();
+
+        // 🔥 LOCK CHECK (block interaction)
+        if (el.locked) {
+          return; // selectable but not draggable/resizable
+        }
 
         resizeHandle = getHandle(el, mouse);
 
@@ -76,7 +82,7 @@ export const selectTool = {
   onMouseMove(e) {
     const mouse = screenToWorld(e.clientX, e.clientY);
     const el = state.selectedElement;
-    if (!el) return;
+    if (!el || el.locked) return; // 🔥 block movement
 
     // 🔥 DRAG
     if (isDragging) {
@@ -84,7 +90,7 @@ export const selectTool = {
       el.y = mouse.y - dragOffset.y;
     }
 
-    // 🔥 RESIZE (ALL 4 CORNERS)
+    // 🔥 RESIZE
     if (isResizing) {
       if (resizeHandle === "br") {
         el.w = mouse.x - el.x;
@@ -120,7 +126,7 @@ export const selectTool = {
     resizeHandle = null;
 
     if (changed) {
-      saveState(); // ✅ only when needed
+      saveState();
     }
   },
 };

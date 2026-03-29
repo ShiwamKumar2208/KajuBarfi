@@ -71,6 +71,7 @@ export const rectTool = {
       w: 0,
       h: 0,
       color,
+      locked: false,
     };
 
     state.elements.push(rect);

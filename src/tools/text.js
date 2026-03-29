@@ -46,6 +46,7 @@ export const textTool = {
       w: 200,
       h: 30,
       text: value,
+      locked: false,
       style: {
         fontSize: 24,
         fontFamily: "Arial",

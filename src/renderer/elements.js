@@ -7,13 +7,17 @@ const ENABLE_TEXT_WRAP = true;
 function drawSelection(ctx, el, zoom) {
   const colors = getThemeColors();
 
+  // 🔥 CHANGE COLOR IF LOCKED
+  ctx.strokeStyle = el.locked
+    ? (colors.locked || "#ff4d4d")
+    : colors.selection;
+
   const x1 = Math.min(el.x, el.x + el.w);
   const y1 = Math.min(el.y, el.y + el.h);
   const w = Math.abs(el.w);
   const h = Math.abs(el.h);
 
   // 🔥 OUTLINE
-  ctx.strokeStyle = colors.selection;
   ctx.lineWidth = Math.max(1, 2 / zoom);
   ctx.setLineDash([6 / zoom, 4 / zoom]); // dashed like pro tools
   ctx.strokeRect(x1, y1, w, h);
@@ -40,13 +44,15 @@ function drawSelection(ctx, el, zoom) {
       p.x - size / 2 + 2 / zoom,
       p.y - size / 2 + 2 / zoom,
       size - 4 / zoom,
-      size - 4 / zoom
+      size - 4 / zoom,
     );
   });
 }
 
 export function drawElements(ctx) {
   state.elements.forEach((el) => {
+    if (el.locked === undefined) el.locked = false;
+
     // RECT
     if (el.type === "rect") {
       ctx.fillStyle = el.color;
@@ -135,3 +141,5 @@ export function drawElements(ctx) {
     }
   });
 }
+
+window.updateQuickActions?.();

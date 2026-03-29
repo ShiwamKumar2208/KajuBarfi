@@ -19,6 +19,7 @@ export function draw(ctx, canvas) {
 
   drawGrid(ctx, canvas);
   drawElements(ctx);
+  window.updateQuickActions?.();
 
   ctx.restore();
 
