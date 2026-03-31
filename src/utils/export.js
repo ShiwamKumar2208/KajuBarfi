@@ -1,5 +1,6 @@
 import { state } from "../state.js";
 import { ensureImage } from "./image.js";
+import { getThemeColors } from "./settings.js";
 
 export function exportPNG(canvas, name = "kaju.png") {
   const exportCanvas = document.createElement("canvas");
@@ -8,8 +9,10 @@ export function exportPNG(canvas, name = "kaju.png") {
   exportCanvas.width = canvas.width;
   exportCanvas.height = canvas.height;
 
-  // background
-  ctx.fillStyle = "#111";
+  const colors = getThemeColors();
+
+  // 🔥 correct background (theme-based)
+  ctx.fillStyle = colors.bg;
   ctx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
 
   ctx.save();
@@ -24,8 +27,8 @@ export function exportPNG(canvas, name = "kaju.png") {
     }
 
     if (el.type === "sketch") {
-      ctx.strokeStyle = el.color;
-      ctx.lineWidth = el.width;
+      ctx.strokeStyle = el.color || colors.stroke;
+      ctx.lineWidth = el.width / state.camera.zoom; // 🔥 fix thickness
 
       ctx.beginPath();
       el.points.forEach((p, i) => {
@@ -43,11 +46,46 @@ export function exportPNG(canvas, name = "kaju.png") {
     }
 
     if (el.type === "text") {
-      ctx.fillStyle = el.style.color;
-      ctx.font = `${el.style.fontSize}px ${el.style.fontFamily}`;
+      const colors = getThemeColors();
 
-      el.text.split("\n").forEach((line, i) => {
-        ctx.fillText(line, el.x, el.y + i * el.style.fontSize);
+      ctx.fillStyle = el.style.color || colors.text;
+      ctx.textBaseline = "top";
+
+      const fontSize = Math.max(12, el.style.fontSize || 24);
+      ctx.font = `${fontSize}px ${el.style.fontFamily}`;
+
+      const maxWidth = el.fixedWidth ? el.w : Infinity;
+
+      function wrapText(text, maxWidth) {
+        const words = text.split(" ");
+        const lines = [];
+        let currentLine = "";
+
+        words.forEach((word) => {
+          const test = currentLine ? currentLine + " " + word : word;
+          const width = ctx.measureText(test).width;
+
+          if (width <= maxWidth) {
+            currentLine = test;
+          } else {
+            if (currentLine) lines.push(currentLine);
+            currentLine = word;
+          }
+        });
+
+        if (currentLine) lines.push(currentLine);
+        return lines;
+      }
+
+      const rawLines = el.text.split("\n");
+      const lines = [];
+
+      rawLines.forEach((line) => {
+        lines.push(...wrapText(line, maxWidth));
+      });
+
+      lines.forEach((line, i) => {
+        ctx.fillText(line, el.x, el.y + i * fontSize);
       });
     }
   });

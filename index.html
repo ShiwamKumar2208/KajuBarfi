@@ -26,82 +26,83 @@
     <input type="file" id="fileInput" accept=".kj" hidden />
     <canvas id="canvas" tabindex="0"></canvas>
     <div id="helpModal" class="help-modal hidden">
-      <div class="help-content">
-        <button id="closeHelp">✖</button>
+      <div class="help-content modern">
+        <div class="help-header">
+          <h1>🟨 Kaju Board</h1>
+          <button id="closeHelp">✖</button>
+        </div>
 
-        <h1>Kaju Board Guide</h1>
-        <p class="help-sub">
-          Everything you need to use this board efficiently.
-        </p>
+        <!-- <p class="help-sub">Fast. Minimal. No nonsense canvas.</p> -->
 
-        <section>
-          <h3>🛠 Tools</h3>
-          <ul>
-            <li><b>V</b> → Select / Move</li>
-            <li><b>R</b> → Rectangle</li>
-            <li><b>T</b> → Text</li>
-            <li><b>S</b> → Sketch (free draw)</li>
-            <li><b>E</b> → Eraser</li>
-          </ul>
-        </section>
+        <div class="help-grid">
+          <!-- TOOLS -->
+          <section>
+            <h3>🛠 Tools</h3>
+            <ul>
+              <li><kbd>V</kbd> Select</li>
+              <li><kbd>R</kbd> Rectangle</li>
+              <li><kbd>T</kbd> Text</li>
+              <li><kbd>S</kbd> Sketch</li>
+              <li><kbd>E</kbd> Eraser</li>
+            </ul>
+          </section>
 
-        <section>
-          <h3>🖱 Interaction</h3>
-          <ul>
-            <li>Drag → Move element</li>
-            <li>Drag corners → Resize</li>
-            <li>Click → Select</li>
-            <li>Delete / Backspace → Remove</li>
-          </ul>
-        </section>
+          <!-- NAVIGATION -->
+          <section>
+            <h3>🧭 Navigation</h3>
+            <ul>
+              <li><kbd>Ctrl + Arrow</kbd> Move</li>
+              <li><kbd>Scroll</kbd> → Zoom</li>
+              <li><kbd>Space + Drag</kbd> → Pan</li>
+            </ul>
+          </section>
 
-        <section>
-          <h3>⚡ Shortcuts</h3>
-          <ul>
-            <li><b>Ctrl + D</b> → Duplicate</li>
-            <li><b>Ctrl + M</b> → Lock Movement / Unlock Movement</li>
-            <li><b>Ctrl + Arrow</b> → Move precisely</li>
-            <li><b>Shift + Ctrl + Arrow</b> → Faster move</li>
-            <li><b>Ctrl + Z / Y</b> → Undo / Redo</li>
-            <li><b>Esc</b> → Back to Select tool</li>
-          </ul>
-        </section>
+          <!-- ACTIONS -->
+          <section>
+            <h3>⚡ Actions</h3>
+            <ul>
+              <li><kbd>Ctrl + D</kbd> Duplicate</li>
+              <li><kbd>Ctrl + M</kbd> Lock / Unlock</li>
+              <li><kbd>Delete</kbd> Remove</li>
+              <li><kbd>Ctrl + Z / Y</kbd> Undo / Redo</li>
+            </ul>
+          </section>
 
-        <section>
-          <h3>🧭 Navigation</h3>
-          <ul>
-            <li>Scroll → Zoom</li>
-            <li>Space + Drag → Pan</li>
-          </ul>
-        </section>
+          <!-- MOVEMENT -->
+          <section>
+            <h3>🎯 Precision</h3>
+            <ul>
+              <li><kbd>Shift + Ctrl + Arrow</kbd> Faster</li>
+              <li><kbd>+</kbd> size of text in V mode</li>
+              <li><kbd>-</kbd> size of text in V mode</li>
+            </ul>
+          </section>
 
-        <section>
-          <h3>🎨 Extras</h3>
-          <ul>
-            <li>Ctrl + Click (Rectangle) → Change color</li>
-            <li>Drag & Drop → Add image</li>
-            <li>🖼 Button → Add image via URL</li>
-            <li>🔒 Locked elements cannot be moved or resized</li>
-          </ul>
-        </section>
+          <!-- FILES -->
+          <section>
+            <h3>💾 Files</h3>
+            <ul>
+              <li>Save → .kj file</li>
+              <li>Load → Restore board</li>
+              <li>Export → PNG</li>
+            </ul>
+          </section>
 
-        <section>
-          <h3>💾 Files</h3>
-          <ul>
-            <li>Save → Downloads a .kj file</li>
-            <li>Load → Restore previous board</li>
-            <li>Export → Save as PNG</li>
-          </ul>
-        </section>
+          <!-- EXTRAS -->
+          <section>
+            <h3>🎨 Extras</h3>
+            <ul>
+              <li><kbd>Ctrl + Click</kbd> → Change color</li>
+              <li>Drag & Drop → Image</li>
+              <li>🖼 → Image URL</li>
+            </ul>
+          </section>
+        </div>
 
-        <section class="tip">
-          <h3>💡 Tips</h3>
-          <ul>
-            <li>Use duplicate (Ctrl + D) instead of redrawing</li>
-            <li>Lock background elements to avoid accidental movement</li>
-            <li>Use zoom + pan for large boards</li>
-          </ul>
-        </section>
+        <!-- TIPS -->
+        <div class="help-tip">
+          💡 Pro tip: Duplicate + Lock = instant layout system
+        </div>
       </div>
     </div>
     <div id="quickActions" class="quick-actions">

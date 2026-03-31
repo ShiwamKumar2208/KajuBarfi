@@ -20,7 +20,7 @@ export const textTool = {
   onMouseDown(e) {
     const mouse = screenToWorld(e.clientX, e.clientY);
 
-    // 🔥 Check if clicking existing text → edit
+    // 🔥 edit existing
     for (let i = state.elements.length - 1; i >= 0; i--) {
       const el = state.elements[i];
 
@@ -34,7 +34,7 @@ export const textTool = {
       }
     }
 
-    // 🔥 Create new text
+    // 🔥 create new
     const value = prompt("Enter text:");
     if (!value) return;
 
@@ -43,7 +43,7 @@ export const textTool = {
       type: "text",
       x: mouse.x,
       y: mouse.y,
-      w: 200,
+      w: 200, // 🔥 fixed width box
       h: 30,
       text: value,
       locked: false,
@@ -52,6 +52,7 @@ export const textTool = {
         fontFamily: "Arial",
         color: null,
       },
+      fixedWidth: true, // 🔥 important flag
     };
 
     state.elements.push(textEl);

@@ -7,7 +7,6 @@ const ENABLE_TEXT_WRAP = true;
 function drawSelection(ctx, el, zoom) {
   const colors = getThemeColors();
 
-  // 🔥 CHANGE COLOR IF LOCKED
   ctx.strokeStyle = el.locked
     ? (colors.locked || "#ff4d4d")
     : colors.selection;
@@ -17,13 +16,11 @@ function drawSelection(ctx, el, zoom) {
   const w = Math.abs(el.w);
   const h = Math.abs(el.h);
 
-  // 🔥 OUTLINE
   ctx.lineWidth = Math.max(1, 2 / zoom);
-  ctx.setLineDash([6 / zoom, 4 / zoom]); // dashed like pro tools
+  ctx.setLineDash([6 / zoom, 4 / zoom]);
   ctx.strokeRect(x1, y1, w, h);
-  ctx.setLineDash([]); // reset
+  ctx.setLineDash([]);
 
-  // 🔥 HANDLES
   const size = Math.max(6, 8 / zoom);
 
   const corners = [
@@ -34,11 +31,9 @@ function drawSelection(ctx, el, zoom) {
   ];
 
   corners.forEach((p) => {
-    // outer border (contrast)
     ctx.fillStyle = colors.bg;
     ctx.fillRect(p.x - size / 2, p.y - size / 2, size, size);
 
-    // inner square
     ctx.fillStyle = colors.handle;
     ctx.fillRect(
       p.x - size / 2 + 2 / zoom,
@@ -50,18 +45,19 @@ function drawSelection(ctx, el, zoom) {
 }
 
 export function drawElements(ctx) {
+  const colors = getThemeColors();
+
   state.elements.forEach((el) => {
     if (el.locked === undefined) el.locked = false;
 
-    // RECT
+    // ================= RECT =================
     if (el.type === "rect") {
       ctx.fillStyle = el.color;
       ctx.fillRect(el.x, el.y, el.w, el.h);
     }
 
-    // SKETCH
+    // ================= SKETCH =================
     if (el.type === "sketch") {
-      const colors = getThemeColors();
       ctx.strokeStyle = el.color || colors.stroke;
       ctx.lineWidth = el.width / state.camera.zoom;
 
@@ -73,50 +69,49 @@ export function drawElements(ctx) {
       ctx.stroke();
     }
 
-    // IMAGE
+    // ================= IMAGE =================
     if (el.type === "image") {
       ensureImage(el);
-
       if (el.img && el.img.complete) {
         ctx.drawImage(el.img, el.x, el.y, el.w, el.h);
       }
     }
 
-    // TEXT
+    // ================= TEXT =================
     if (el.type === "text") {
-      const colors = getThemeColors();
       ctx.fillStyle = el.style.color || colors.text;
 
-      const fontSize = Math.max(12, Math.abs(el.h));
+      const fontSize = Math.max(12, el.style.fontSize || 24);
       ctx.font = `${fontSize}px ${el.style.fontFamily}`;
       ctx.textBaseline = "top";
 
-      const maxWidth = ENABLE_TEXT_WRAP ? Math.abs(el.w) || 200 : Infinity;
+      // 🔥 FIX: stable width source
+      const baseWidth = el.fixedWidth ? el.w : (Math.abs(el.w) || 200);
+      const maxWidth = ENABLE_TEXT_WRAP ? baseWidth : Infinity;
 
       function wrapText(text, maxWidth) {
         const words = text.split(" ");
         const lines = [];
-        let currentLine = words[0] || "";
+        let currentLine = "";
 
-        for (let i = 1; i < words.length; i++) {
-          const word = words[i];
-          const testLine = currentLine + " " + word;
-          const width = ctx.measureText(testLine).width;
+        words.forEach((word) => {
+          const test = currentLine ? currentLine + " " + word : word;
+          const width = ctx.measureText(test).width;
 
-          if (width < maxWidth) {
-            currentLine = testLine;
+          if (width <= maxWidth) {
+            currentLine = test;
           } else {
-            lines.push(currentLine);
+            if (currentLine) lines.push(currentLine);
             currentLine = word;
           }
-        }
+        });
 
-        lines.push(currentLine);
+        if (currentLine) lines.push(currentLine);
         return lines;
       }
 
       const rawLines = el.text.split("\n");
-      let lines = [];
+      const lines = [];
 
       rawLines.forEach((line) => {
         lines.push(...wrapText(line, maxWidth));
@@ -126,14 +121,17 @@ export function drawElements(ctx) {
         ctx.fillText(line, el.x, el.y + i * fontSize);
       });
 
-      // 🔥 update bounds
-      const widest = Math.max(
-        ...lines.map((line) => ctx.measureText(line).width),
-        0,
-      );
-
-      el.w = widest;
+      // 🔥 IMPORTANT: only update height ALWAYS
       el.h = fontSize * lines.length;
+
+      // 🔥 width update ONLY if not fixed
+      if (!el.fixedWidth) {
+        const widest = Math.max(
+          ...lines.map((line) => ctx.measureText(line).width),
+          0,
+        );
+        el.w = widest;
+      }
     }
 
     if (state.selectedElement === el) {

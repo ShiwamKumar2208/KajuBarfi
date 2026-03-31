@@ -14,6 +14,21 @@ export function setupKeyboard() {
       return;
     }
 
+    if (state.selectedElement?.type === "text") {
+      if (key === "+") {
+        state.selectedElement.style.fontSize += 2;
+        saveState();
+      }
+
+      if (key === "-") {
+        state.selectedElement.style.fontSize = Math.max(
+          8,
+          state.selectedElement.style.fontSize - 2,
+        );
+        saveState();
+      }
+    }
+
     // ================= CTRL SHORTCUTS =================
     if (e.ctrlKey) {
       // 🔥 PREVENT DEFAULT FOR MOST
