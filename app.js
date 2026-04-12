@@ -14,6 +14,18 @@ import {
 } from "./src/utils/settings.js";
 import { ensureImage } from "./src/utils/image.js";
 
+window.addEventListener("mousemove", (e) => {
+  if (!state.trailEnabled) return;
+
+  state.trail.push({
+    x: e.clientX,
+    y: e.clientY,
+    life: 1,
+  });
+
+  if (state.trail.length > 80) state.trail.shift();
+});
+
 // ================= QUICK ACTIONS =================
 
 const qa = document.getElementById("quickActions");
@@ -313,6 +325,13 @@ document.getElementById("fileInput").addEventListener("change", (e) => {
   };
 
   reader.readAsText(file);
+});
+
+const trailBtn = document.getElementById("trailToggle");
+
+trailBtn?.addEventListener("click", () => {
+  state.trailEnabled = !state.trailEnabled;
+  trailBtn.classList.toggle("active", state.trailEnabled);
 });
 
 // ================= PANNING =================

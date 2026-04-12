@@ -11,10 +11,16 @@ export const state = {
     },
   ],
   camera: { x: 0, y: 0, zoom: 1 },
+
   history: [],
   historyIndex: -1,
+
   currentTool: "select",
   nextId: 1,
+
+  trailEnabled: false,   // ✅ toggle
+  trail: [],             // ✅ actual data (THIS replaces your local variable)
+
   textEditing: {
     active: false,
     element: null,
