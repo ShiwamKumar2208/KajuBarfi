@@ -21,6 +21,9 @@ export const state = {
   selectedElements: [],
   selectionBox: null,
 
+  eraserRadius: 12,
+  isErasing: false,
+
   currentTool: "select",
   nextId: 1,
 
@@ -28,8 +31,8 @@ export const state = {
   magnifierZoom: 1,
   mouse: { x: 0, y: 0 },
 
-  trailEnabled: false,   // ✅ toggle
-  trail: [],             // ✅ actual data (THIS replaces your local variable)
+  trailEnabled: false,    
+  trail: [],              
 
   textEditing: {
     active: false,

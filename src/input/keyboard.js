@@ -21,6 +21,9 @@ export function setupKeyboard() {
 
     if (isTyping(e)) return;
 
+    if (key === "[") state.eraserRadius = Math.max(2, state.eraserRadius - 2);
+    if (key === "]") state.eraserRadius += 2;
+
     if (state.selectedElement?.type === "text") {
       if (key === "+") {
         state.selectedElement.style.fontSize += 2;

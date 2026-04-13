@@ -43,10 +43,7 @@ export function draw(ctx, canvas) {
   if (state.trailEnabled) {
     ctx.save();
 
-    const baseColor =
-      colors.stroke === "#ffffff"
-        ? "180,220,255"
-        : "60,60,60";
+    const baseColor = colors.stroke === "#ffffff" ? "180,220,255" : "60,60,60";
 
     ctx.shadowBlur = 12;
     ctx.shadowColor = `rgba(${baseColor}, 0.8)`;
@@ -115,7 +112,7 @@ export function draw(ctx, canvas) {
       radius * 0.75,
       mx,
       my,
-      radius
+      radius,
     );
 
     gradient.addColorStop(0, "rgba(0,0,0,0)");
@@ -144,6 +141,19 @@ export function draw(ctx, canvas) {
     ctx.lineTo(mx, my + size);
     ctx.stroke();
 
+    ctx.restore();
+  }
+
+  // ================= ERASER CURSOR =================
+  if (state.currentTool === "eraser" || state.isErasing) {
+    const radius = state.eraserRadius;
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(state.mouse.x, state.mouse.y, radius, 0, Math.PI * 2);
+    ctx.strokeStyle = "rgba(255,255,255,0.8)";
+    ctx.lineWidth = 1;
+    ctx.stroke();
     ctx.restore();
   }
 

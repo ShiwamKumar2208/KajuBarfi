@@ -28,6 +28,7 @@
 │   │   └── text.js
 │   ├── ui
 │   │   ├── help.js
+│   │   ├── inputModal.js
 │   │   ├── quickActions.js
 │   │   ├── settingsUI.js
 │   │   ├── textModal.js
@@ -46,4 +47,4 @@
 ├── tree.txt
 └── wel.png
 
-9 directories, 38 files
+9 directories, 39 files
