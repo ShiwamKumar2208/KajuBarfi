@@ -303,7 +303,7 @@ body.light kbd {
   background: #ddd;
 }
 
-/* 🔥 Hide cursor when magnifier active */
-body.hide-cursor {
-  cursor: none;
+body.hide-cursor,
+body.hide-cursor * {
+  cursor: none !important;
 }
