@@ -7,6 +7,9 @@ export function setupCamera(canvas) {
   let spacePressed = false;
 
   window.addEventListener("keydown", (e) => {
+    // 🔥 only when canvas is focused
+    if (document.activeElement !== canvas) return;
+
     if (e.code === "Space") {
       spacePressed = true;
       e.preventDefault();
@@ -14,10 +17,28 @@ export function setupCamera(canvas) {
   });
 
   window.addEventListener("keyup", (e) => {
-    if (e.code === "Space") spacePressed = false;
+    if (document.activeElement !== canvas) return;
+
+    if (e.code === "Space") {
+      spacePressed = false;
+    }
   });
 
+  // 🔥 HELPER → block UI interactions
+  function isUI(target) {
+    return (
+      target.closest("#toolbar") ||
+      target.closest(".help-modal") ||
+      target.closest("#quickActions")
+    );
+  }
+
+  // 🔥 MOUSEDOWN
   canvas.addEventListener("mousedown", (e) => {
+    // ❌ ignore UI clicks
+    if (isUI(e.target)) return;
+
+    // 🔥 pan mode
     if (spacePressed || e.button === 1) {
       isPanning = true;
       lastMouse = { x: e.clientX, y: e.clientY };
@@ -27,6 +48,7 @@ export function setupCamera(canvas) {
     tools[state.currentTool]?.onMouseDown?.(e);
   });
 
+  // 🔥 MOUSEMOVE
   canvas.addEventListener("mousemove", (e) => {
     if (isPanning) {
       const dx = (e.clientX - lastMouse.x) / state.camera.zoom;
@@ -42,11 +64,13 @@ export function setupCamera(canvas) {
     tools[state.currentTool]?.onMouseMove?.(e);
   });
 
+  // 🔥 MOUSEUP
   canvas.addEventListener("mouseup", (e) => {
     isPanning = false;
     tools[state.currentTool]?.onMouseUp?.(e);
   });
 
+  // 🔥 ZOOM
   canvas.addEventListener("wheel", (e) => {
     e.preventDefault();
 

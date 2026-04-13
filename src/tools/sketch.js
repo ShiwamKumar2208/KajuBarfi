@@ -8,8 +8,7 @@ let currentStroke = null;
 export const sketchTool = {
   onMouseDown(e) {
     // 🔥 CTRL → erase mode
-    if (e.ctrlKey) {
-      document.body.classList.add("hide-cursor");
+    if (e.ctrlKey) { 
       eraserTool.onMouseDown(e);
       return;
     }
@@ -42,8 +41,7 @@ export const sketchTool = {
 
   onMouseUp(e) {
     // 🔥 CTRL → erase mode
-    if (e.ctrlKey) {
-      document.body.classList.remove("hide-cursor");
+    if (e.ctrlKey) { 
       eraserTool.onMouseUp(e);
       return;
     }

@@ -20,6 +20,17 @@ export function draw(ctx, canvas) {
   drawGrid(ctx, canvas);
   drawElements(ctx);
 
+  // 🔥 GLOBAL CURSOR CONTROL (MERGED)
+  if (
+    state.magnifierEnabled ||
+    state.currentTool === "eraser" ||
+    state.isErasing
+  ) {
+    document.body.classList.add("hide-cursor");
+  } else {
+    document.body.classList.remove("hide-cursor");
+  }
+
   // ================= SELECTION BOX =================
   if (state.selectionBox) {
     const box = state.selectionBox;

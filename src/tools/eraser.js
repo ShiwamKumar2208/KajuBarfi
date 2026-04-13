@@ -88,9 +88,7 @@ export const eraserTool = {
     }
 
     isDragging = true;
-    state.isErasing = true;
-
-    document.body.classList.add("hide-cursor");
+    state.isErasing = true; 
 
     eraseAt(mouse);
   },
@@ -106,9 +104,7 @@ export const eraserTool = {
     if (!isDragging) return;
 
     isDragging = false;
-    state.isErasing = false;
-
-    document.body.classList.remove("hide-cursor");
+    state.isErasing = false; 
 
     saveState(); // 🔥 single history entry
   },
