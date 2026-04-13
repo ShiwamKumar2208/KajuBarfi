@@ -19,6 +19,7 @@ export const state = {
   nextId: 1,
 
   magnifierEnabled: false,
+  magnifierZoom: 1,
   mouse: { x: 0, y: 0 },
 
   trailEnabled: false,   // ✅ toggle

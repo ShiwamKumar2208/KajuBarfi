@@ -8,7 +8,7 @@ export function draw(ctx, canvas) {
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // 🔥 background from theme
+  // 🔥 background
   ctx.fillStyle = colors.bg;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -26,17 +26,14 @@ export function draw(ctx, canvas) {
   // ================= TRAIL =================
 
   if (state.trailEnabled) {
-    ctx.save(); // isolate effect
+    ctx.save();
 
-    const colors = getThemeColors();
-
-    // 🔥 adaptive color (better than pure white/black)
     const baseColor =
       colors.stroke === "#ffffff"
-        ? "180,220,255" // bluish glow for dark mode
-        : "60,60,60";   // soft dark for light mode
+        ? "180,220,255"
+        : "60,60,60";
 
-    ctx.shadowBlur = 12; // balanced (not too heavy)
+    ctx.shadowBlur = 12;
     ctx.shadowColor = `rgba(${baseColor}, 0.8)`;
 
     state.trail.forEach((p) => {
@@ -49,39 +46,37 @@ export function draw(ctx, canvas) {
       p.life -= 0.03;
     });
 
-    ctx.restore(); // reset cleanly
+    ctx.restore();
 
-    // 🔥 cleanup dead particles
     state.trail = state.trail.filter((p) => p.life > 0);
   }
 
-  // ========= Screen Magnifier ==============
+  // ================= MAGNIFIER =================
 
-  if (state.magnifierEnabled) {
-    const size = 120;     // radius
-    const zoom = 2;       // magnification
+  // 🔥 smooth zoom in + out (no snapping)
+  const targetZoom = state.magnifierEnabled ? 2.2 : 1;
+  state.magnifierZoom += (targetZoom - state.magnifierZoom) * 0.12;
+
+  if (state.magnifierZoom > 1.01) {
+    const radius = 120;
+    const zoom = state.magnifierZoom;
 
     const mx = state.mouse.x;
     const my = state.mouse.y;
 
     ctx.save();
 
-    // 🔥 circular lens
+    // 🔥 circular clip
     ctx.beginPath();
-    ctx.arc(mx, my, size, 0, Math.PI * 2);
+    ctx.arc(mx, my, radius, 0, Math.PI * 2);
     ctx.clip();
 
-    // 🔥 border (optional but looks good)
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = "rgba(255,255,255,0.5)";
-    ctx.stroke();
-
-    // 🔥 zoom effect
+    // 🔥 zoom transform
     ctx.translate(mx, my);
     ctx.scale(zoom, zoom);
     ctx.translate(-mx, -my);
 
-    // 🔥 redraw scene INSIDE lens
+    // redraw scene inside lens
     ctx.fillStyle = colors.bg;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -93,6 +88,42 @@ export function draw(ctx, canvas) {
     drawElements(ctx);
 
     ctx.restore();
+    ctx.restore();
+
+    // ================= FEATHER EDGE =================
+
+    ctx.save();
+
+    const gradient = ctx.createRadialGradient(
+      mx, my, radius * 0.75,
+      mx, my, radius
+    );
+
+    gradient.addColorStop(0, "rgba(0,0,0,0)");
+    gradient.addColorStop(1, "rgba(0,0,0,0.25)");
+
+    ctx.beginPath();
+    ctx.arc(mx, my, radius, 0, Math.PI * 2);
+    ctx.fillStyle = gradient;
+    ctx.fill();
+
+    ctx.restore();
+
+    // ================= CROSSHAIR =================
+
+    ctx.save();
+
+    ctx.strokeStyle = "rgba(255,255,255,0.6)";
+    ctx.lineWidth = 1;
+
+    const size = 10;
+
+    ctx.beginPath();
+    ctx.moveTo(mx - size, my);
+    ctx.lineTo(mx + size, my);
+    ctx.moveTo(mx, my - size);
+    ctx.lineTo(mx, my + size);
+    ctx.stroke();
 
     ctx.restore();
   }

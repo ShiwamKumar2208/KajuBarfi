@@ -302,3 +302,8 @@ body.light .help-grid section {
 body.light kbd {
   background: #ddd;
 }
+
+/* 🔥 Hide cursor when magnifier active */
+body.hide-cursor {
+  cursor: none;
+}

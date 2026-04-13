@@ -35,24 +35,27 @@ window.addEventListener("mousemove", (e) => {
 
 // ================= MAGNIFIER =================
 
-window.addEventListener("keydown", (e) => {
-  if (e.key.toLowerCase() === "z") {
-    state.magnifierEnabled = true;
-  }
+let magnifierKeyActive = false;
 
-  if (e.key === "Alt") {
+window.addEventListener("keydown", (e) => {
+  if (e.key.toLowerCase() === "z" || e.key === "Alt") {
+    magnifierKeyActive = true;
     state.magnifierEnabled = true;
+    document.body.classList.add("hide-cursor");
   }
 });
 
 window.addEventListener("keyup", (e) => {
-  if (e.key.toLowerCase() === "z") {
+  if (e.key.toLowerCase() === "z" || e.key === "Alt") {
+    magnifierKeyActive = false;
     state.magnifierEnabled = false;
+    document.body.classList.remove("hide-cursor");
   }
+});
 
-  if (e.key === "Alt") {
-    state.magnifierEnabled = false;
-  }
+window.addEventListener("blur", () => {
+  state.magnifierEnabled = false;
+  document.body.classList.remove("hide-cursor");
 });
 
 // ================= QUICK ACTIONS =================
