@@ -6,6 +6,12 @@
 ├── logo.png
 ├── README.md
 ├── src
+│   ├── core
+│   │   ├── cameraControls.js
+│   │   ├── canvas.js
+│   │   └── events.js
+│   ├── features
+│   │   └── files.js
 │   ├── input
 │   │   └── keyboard.js
 │   ├── renderer
@@ -20,6 +26,13 @@
 │   │   ├── select.js
 │   │   ├── sketch.js
 │   │   └── text.js
+│   ├── ui
+│   │   ├── help.js
+│   │   ├── quickActions.js
+│   │   ├── settingsUI.js
+│   │   ├── textModal.js
+│   │   ├── toolbar.js
+│   │   └── tooltip.js
 │   └── utils
 │       ├── camera.js
 │       ├── export.js
@@ -33,4 +46,4 @@
 ├── tree.txt
 └── wel.png
 
-6 directories, 28 files
+9 directories, 38 files

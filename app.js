@@ -10,6 +10,7 @@ import { setupHelp } from "./src/ui/help.js";
 import { setupSettingsUI } from "./src/ui/settingsUI.js";
 import { setupQuickActions } from "./src/ui/quickActions.js";
 import { setupTooltip } from "./src/ui/tooltip.js";
+import { setupTextModal } from "./src/ui/textModal.js";
 
 import { setupFiles } from "./src/features/files.js";
 
@@ -18,37 +19,36 @@ import { state } from "./src/state.js";
 import { saveState } from "./src/utils/history.js";
 import { ensureImage } from "./src/utils/image.js";
 
-const { canvas, ctx } = setupCanvas();
+document.addEventListener("DOMContentLoaded", () => {
+  const { canvas, ctx } = setupCanvas();
 
-// ================= CORE =================
-setupGlobalEvents();
-setupCamera(canvas);
+  // ================= CORE =================
+  setupGlobalEvents();
+  setupCamera(canvas);
 
-// ================= UI =================
-setupToolbar();
-setupHelp();
-setupSettingsUI();
-setupQuickActions();
-setupTooltip();
+  // ================= UI =================
+  setupToolbar();
+  setupHelp();
+  setupSettingsUI();
+  setupQuickActions();
+  setupTooltip();
+  setupTextModal();
 
-// ================= SETTINGS SYNC =================
-const settings = getSettings();
-state.trailEnabled = settings.trail;
+  // ================= SETTINGS =================
+  const settings = getSettings();
+  state.trailEnabled = settings.trail;
 
-// ================= FEATURES =================
-setupFiles(canvas);
-setupKeyboard();
+  // ================= FEATURES =================
+  setupFiles(canvas);
+  setupKeyboard();
 
-// ================= 🔥 CRITICAL FIX =================
-// Ensure all images are initialized BEFORE saving history
-state.elements.forEach((el) => {
-  if (el.type === "image") {
-    ensureImage(el);
-  }
+  // ================= INIT =================
+  state.elements.forEach((el) => {
+    if (el.type === "image") ensureImage(el);
+  });
+
+  saveState();
+
+  // ================= RENDER =================
+  draw(ctx, canvas);
 });
-
-// Save initial state (welcome screen)
-saveState();
-
-// ================= RENDER =================
-draw(ctx, canvas);

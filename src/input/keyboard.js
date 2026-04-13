@@ -3,6 +3,11 @@ import { undo, redo, saveState } from "../utils/history.js";
 import { ensureImage } from "../utils/image.js";
 import { updateToolbar } from "../utils/ui.js";
 
+function isTyping(e) {
+  const tag = e.target.tagName;
+  return tag === "INPUT" || tag === "TEXTAREA" || e.target.isContentEditable;
+}
+
 export function setupKeyboard() {
   window.addEventListener("keydown", (e) => {
     const key = e.key.toLowerCase();
@@ -13,6 +18,8 @@ export function setupKeyboard() {
       updateToolbar(state);
       return;
     }
+
+    if (isTyping(e)) return;
 
     if (state.selectedElement?.type === "text") {
       if (key === "+") {

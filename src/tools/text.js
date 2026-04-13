@@ -1,6 +1,5 @@
 import { state } from "../state.js";
 import { screenToWorld } from "../utils/camera.js";
-import { saveState } from "../utils/history.js";
 
 function isInside(el, mouse) {
   const x1 = Math.min(el.x, el.x + el.w);
@@ -25,39 +24,18 @@ export const textTool = {
       const el = state.elements[i];
 
       if (el.type === "text" && isInside(el, mouse)) {
-        const newText = prompt("Edit text:", el.text);
-        if (newText !== null) {
-          el.text = newText;
-          saveState();
-        }
+        window.openTextModal({
+          mode: "edit",
+          element: el
+        });
         return;
       }
     }
 
     // 🔥 create new
-    const value = prompt("Enter text:");
-    if (!value) return;
-
-    const textEl = {
-      id: state.nextId++,
-      type: "text",
-      x: mouse.x,
-      y: mouse.y,
-      w: 200, // 🔥 fixed width box
-      h: 30,
-      text: value,
-      locked: false,
-      style: {
-        fontSize: 24,
-        fontFamily: "Arial",
-        color: null,
-      },
-      fixedWidth: true, // 🔥 important flag
-    };
-
-    state.elements.push(textEl);
-    state.selectedElement = textEl;
-
-    saveState();
+    window.openTextModal({
+      mode: "create",
+      position: mouse
+    });
   },
 };

@@ -113,6 +113,32 @@
       <button id="qaDuplicate" ttip="Duplicate">📋</button>
       <button id="qaLock" ttip="Lock / Unlock">🔒</button>
     </div>
+    <div id="textModal" class="help-modal hidden">
+      <div class="help-content modern text-modal">
+        <div class="help-header">
+          <h2>Text Editor</h2>
+          <button id="closeTextModal">✖</button>
+        </div>
+
+        <textarea id="textInput" placeholder="Enter text..."></textarea>
+
+        <div class="text-controls">
+          <input type="number" id="fontSize" value="24" min="8" />
+          <input type="color" id="fontColor" />
+          <select id="fontFamily">
+            <option>Arial</option>
+            <option>Courier New</option>
+            <option>Times New Roman</option>
+          </select>
+        </div>
+
+        <div class="text-actions">
+          <button id="cancelText">Cancel</button>
+          <button id="applyText">Apply</button>
+        </div>
+      </div>
+    </div>
+
     <script type="module" src="app.js"></script>
   </body>
 </html>
