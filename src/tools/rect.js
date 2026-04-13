@@ -3,6 +3,7 @@ import { screenToWorld } from "../utils/camera.js";
 import { saveState } from "../utils/history.js";
 
 let current = null;
+let justFinished = false; // 🔥 key fix
 
 function isInside(el, mouse) {
   const x1 = Math.min(el.x, el.x + el.w);
@@ -15,9 +16,13 @@ function isInside(el, mouse) {
 
 export const rectTool = {
   onMouseDown(e) {
+    if (justFinished) {
+      justFinished = false;
+      return; // 🔥 ignore accidental click
+    }
+
     const mouse = screenToWorld(e.clientX, e.clientY);
 
-    // 🔥 CTRL + CLICK → APPLY CURRENT COLOR TO EXISTING RECT
     if (e.ctrlKey) {
       for (let i = state.elements.length - 1; i >= 0; i--) {
         const el = state.elements[i];
@@ -31,7 +36,6 @@ export const rectTool = {
       }
     }
 
-    // 🔥 CREATE RECT (uses global color system)
     const rect = {
       id: state.nextId++,
       type: "rect",
@@ -39,13 +43,11 @@ export const rectTool = {
       y: mouse.y,
       w: 0,
       h: 0,
-      color: state.currentColor || "#f5d6a3", // fallback
+      color: state.currentColor || "#f5d6a3",
       locked: false,
     };
 
     state.elements.push(rect);
-
-    // 🔥 AUTO SELECT
     state.selectedElement = rect;
 
     current = rect;
@@ -63,6 +65,7 @@ export const rectTool = {
   onMouseUp() {
     if (current) {
       saveState();
+      justFinished = true; // 🔥 key fix
     }
     current = null;
   },

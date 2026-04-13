@@ -156,7 +156,10 @@ export function draw(ctx, canvas) {
   }
 
   // ================= ERASER CURSOR =================
-  if (state.currentTool === "eraser" || state.isErasing) {
+  if (
+    (state.currentTool === "eraser" || state.isErasing) &&
+    !state.magnifierEnabled
+  ) {
     const radius = state.eraserRadius;
 
     ctx.save();
