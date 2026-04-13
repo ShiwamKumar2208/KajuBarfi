@@ -12,6 +12,8 @@ export function setupInputModal() {
   const applyBtn = document.getElementById("applyInput");
   const cancelBtn = document.getElementById("cancelInput");
 
+  const loading = document.getElementById("inputLoading");
+
   function close() {
     modal.classList.add("hidden");
     currentHandler = null;
@@ -19,6 +21,7 @@ export function setupInputModal() {
     error.textContent = "";
     preview.innerHTML = "";
     preview.classList.add("hidden");
+    loading.classList.add("hidden");
   }
 
   closeBtn.onclick = close;
@@ -29,20 +32,24 @@ export function setupInputModal() {
 
     const value = input.value.trim() || input.placeholder;
 
-    let shouldClose = true; // 🔥 assume success
+    let shouldClose = true;
+
+    // 🔥 show loading
+    loading.classList.remove("hidden");
 
     currentHandler(value, {
       setError: (msg) => {
         error.textContent = msg;
-        shouldClose = false; // ❌ block closing
+        loading.classList.add("hidden"); // stop spinner
+        shouldClose = false;
       },
       clearError: () => {
         error.textContent = "";
       },
       close,
+      stopLoading: () => loading.classList.add("hidden"), // 🔥 NEW
     });
 
-    // 🔥 close only if no error
     if (shouldClose) close();
   };
 

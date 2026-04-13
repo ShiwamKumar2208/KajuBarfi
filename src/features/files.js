@@ -103,6 +103,7 @@ export function setupFiles(canvas) {
         }
 
         const img = new Image();
+        img.crossOrigin = "anonymous";
         img.src = url;
 
         img.onload = () => {
@@ -123,7 +124,8 @@ export function setupFiles(canvas) {
           window.updateQuickActions?.();
           saveState();
 
-          ui.close(); // 🔥 close only on success
+          ui.stopLoading(); // 🔥 stop spinner
+          ui.close();
         };
 
         img.onerror = () => {

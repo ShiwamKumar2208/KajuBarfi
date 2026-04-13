@@ -21,9 +21,36 @@ import { saveState } from "./src/utils/history.js";
 import { ensureImage } from "./src/utils/image.js";
 
 document.addEventListener("DOMContentLoaded", () => {
-  const { canvas, ctx } = setupCanvas();
+  // ================= 🔥 SMART DEVICE DETECTION =================
+  function isTouchOnlyDevice() {
+    return (
+      ("ontouchstart" in window || navigator.maxTouchPoints > 0) &&
+      !window.matchMedia("(pointer: fine)").matches
+    );
+  }
+
+  const mobileBlock = document.getElementById("mobileBlock");
+
+  if (isTouchOnlyDevice()) {
+    mobileBlock.classList.add("active");
+
+    // 🔥 allow escape if user connects keyboard/mouse
+    window.addEventListener(
+      "mousemove",
+      () => mobileBlock.classList.remove("active"),
+      { once: true }
+    );
+
+    window.addEventListener(
+      "keydown",
+      () => mobileBlock.classList.remove("active"),
+      { once: true }
+    );
+  }
 
   // ================= CORE =================
+  const { canvas, ctx } = setupCanvas();
+
   setupGlobalEvents();
   setupCamera(canvas);
 

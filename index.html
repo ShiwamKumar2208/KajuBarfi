@@ -3,9 +3,24 @@
   <head>
     <title>Kaju is noting!</title>
     <link rel="icon" href="logo.png" type="image/x-icon" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
+    <div id="mobileBlock">
+      <div class="mobile-card">
+        <img src="logo.png" class="mobile-icon" />
+
+        <h2>Kaju works best on desktop</h2>
+
+        <p>
+          This tool is built for precision.<br />
+          Use a larger screen with a mouse & keyboard.
+        </p>
+
+        <div class="mobile-hint">Try opening this on your laptop or PC.</div>
+      </div>
+    </div>
     <div id="toolbar">
       <button data-tool="select" ttip="View Mode">V</button>
       <button data-tool="rect" ttip="Rectangle">☐</button>
@@ -152,6 +167,7 @@
 
         <!-- 🔥 PREVIEW -->
         <div id="inputPreview" class="input-preview hidden"></div>
+        <div id="inputLoading" class="input-loading hidden"></div>
 
         <div class="text-actions">
           <button id="cancelInput">Cancel</button>
@@ -160,6 +176,12 @@
       </div>
     </div>
 
+    <div id="exportLoading" class="export-loading hidden">
+      <div class="export-box">
+        <div class="spinner"></div>
+        <p>Exporting… this may take a moment</p>
+      </div>
+    </div>
     <script type="module" src="app.js"></script>
   </body>
 </html>
