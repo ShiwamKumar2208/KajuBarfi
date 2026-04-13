@@ -38,8 +38,9 @@ window.addEventListener("mousemove", (e) => {
 let magnifierKeyActive = false;
 
 window.addEventListener("keydown", (e) => {
+  if (e.ctrlKey || e.metaKey) return;
+
   if (e.key.toLowerCase() === "z" || e.key === "Alt") {
-    magnifierKeyActive = true;
     state.magnifierEnabled = true;
     document.body.classList.add("hide-cursor");
   }
@@ -47,7 +48,6 @@ window.addEventListener("keydown", (e) => {
 
 window.addEventListener("keyup", (e) => {
   if (e.key.toLowerCase() === "z" || e.key === "Alt") {
-    magnifierKeyActive = false;
     state.magnifierEnabled = false;
     document.body.classList.remove("hide-cursor");
   }
