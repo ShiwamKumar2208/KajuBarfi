@@ -22,7 +22,7 @@ export function draw(ctx, canvas) {
   window.updateQuickActions?.();
 
   ctx.restore();
-  
+
   // ================= TRAIL =================
 
   if (state.trailEnabled) {
@@ -53,6 +53,48 @@ export function draw(ctx, canvas) {
 
     // 🔥 cleanup dead particles
     state.trail = state.trail.filter((p) => p.life > 0);
+  }
+
+  // ========= Screen Magnifier ==============
+
+  if (state.magnifierEnabled) {
+    const size = 120;     // radius
+    const zoom = 2;       // magnification
+
+    const mx = state.mouse.x;
+    const my = state.mouse.y;
+
+    ctx.save();
+
+    // 🔥 circular lens
+    ctx.beginPath();
+    ctx.arc(mx, my, size, 0, Math.PI * 2);
+    ctx.clip();
+
+    // 🔥 border (optional but looks good)
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = "rgba(255,255,255,0.5)";
+    ctx.stroke();
+
+    // 🔥 zoom effect
+    ctx.translate(mx, my);
+    ctx.scale(zoom, zoom);
+    ctx.translate(-mx, -my);
+
+    // 🔥 redraw scene INSIDE lens
+    ctx.fillStyle = colors.bg;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.save();
+    ctx.scale(state.camera.zoom, state.camera.zoom);
+    ctx.translate(-state.camera.x, -state.camera.y);
+
+    drawGrid(ctx, canvas);
+    drawElements(ctx);
+
+    ctx.restore();
+
+    ctx.restore();
   }
 
   requestAnimationFrame(() => draw(ctx, canvas));
