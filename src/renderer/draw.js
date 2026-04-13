@@ -23,28 +23,36 @@ export function draw(ctx, canvas) {
 
   ctx.restore();
 
-  // TODO: Add screen magnifier
-
   // ================= TRAIL =================
 
   if (state.trailEnabled) {
-    ctx.save(); // 🔥 isolate effect
+    ctx.save(); // isolate effect
 
-    ctx.shadowBlur = 20;
-    ctx.shadowColor = "white";
+    const colors = getThemeColors();
+
+    // 🔥 adaptive color (better than pure white/black)
+    const baseColor =
+      colors.stroke === "#ffffff"
+        ? "180,220,255" // bluish glow for dark mode
+        : "60,60,60";   // soft dark for light mode
+
+    ctx.shadowBlur = 12; // balanced (not too heavy)
+    ctx.shadowColor = `rgba(${baseColor}, 0.8)`;
 
     state.trail.forEach((p) => {
       ctx.beginPath();
       ctx.arc(p.x, p.y, 6 * p.life, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(255,255,255,${p.life})`;
+
+      ctx.fillStyle = `rgba(${baseColor}, ${p.life})`;
       ctx.fill();
 
       p.life -= 0.03;
     });
 
-    ctx.restore(); // 🔥 reset everything cleanly
+    ctx.restore(); // reset cleanly
 
-    state.trail = state.trail.filter(p => p.life > 0);
+    // 🔥 cleanup dead particles
+    state.trail = state.trail.filter((p) => p.life > 0);
   }
 
   requestAnimationFrame(() => draw(ctx, canvas));
