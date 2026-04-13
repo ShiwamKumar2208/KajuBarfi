@@ -1,13 +1,8 @@
-// TODO: implement multiselect
 // TODO: implement color system
 // TODO: create own text system
 // TODO: correct sketch tool
 // TODO: add eraser for sketch
 
-// 2. 🧠 Multi-select (REAL productivity jump)
-// box select
-// move multiple elements
-// foundation for grouping
 // 3. 🎨 Color system (makes UI feel pro)
 // color picker popup
 // recent colors

@@ -19,6 +19,21 @@ export function draw(ctx, canvas) {
 
   drawGrid(ctx, canvas);
   drawElements(ctx);
+
+  // ================= SELECTION BOX =================
+  if (state.selectionBox) {
+    const box = state.selectionBox;
+
+    ctx.save();
+    ctx.strokeStyle = "rgba(0,150,255,0.9)";
+    ctx.lineWidth = 1 / state.camera.zoom;
+    ctx.setLineDash([6 / state.camera.zoom]);
+
+    ctx.strokeRect(box.x, box.y, box.w, box.h);
+
+    ctx.restore();
+  }
+
   window.updateQuickActions?.();
 
   ctx.restore();
@@ -53,7 +68,7 @@ export function draw(ctx, canvas) {
 
   // ================= MAGNIFIER =================
 
-  // 🔥 smooth zoom in + out (no snapping)
+  // 🔥 smooth zoom (both in + out)
   const targetZoom = state.magnifierEnabled ? 2.2 : 1;
   state.magnifierZoom += (targetZoom - state.magnifierZoom) * 0.12;
 
@@ -95,8 +110,12 @@ export function draw(ctx, canvas) {
     ctx.save();
 
     const gradient = ctx.createRadialGradient(
-      mx, my, radius * 0.75,
-      mx, my, radius
+      mx,
+      my,
+      radius * 0.75,
+      mx,
+      my,
+      radius
     );
 
     gradient.addColorStop(0, "rgba(0,0,0,0)");

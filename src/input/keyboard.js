@@ -163,11 +163,14 @@ export function setupKeyboard() {
 
     // ================= DELETE =================
     if (key === "delete" || key === "backspace") {
-      if (state.selectedElement) {
+      if (state.selectedElements.length > 0) {
         state.elements = state.elements.filter(
-          (el) => el !== state.selectedElement,
+          (el) => !state.selectedElements.includes(el)
         );
+
+        state.selectedElements = [];
         state.selectedElement = null;
+
         saveState();
       }
     }

@@ -134,7 +134,13 @@ export function drawElements(ctx) {
       }
     }
 
-    if (state.selectedElement === el) {
+    // if (state.selectedElement === el) {
+    //   drawSelection(ctx, el, state.camera.zoom);
+    // }
+    if (
+      state.selectedElements?.includes(el) ||
+      state.selectedElement === el
+    ) {
       drawSelection(ctx, el, state.camera.zoom);
     }
   });

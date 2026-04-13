@@ -3,10 +3,7 @@ import { screenToWorld } from "../utils/camera.js";
 import { saveState } from "../utils/history.js";
 
 let isDragging = false;
-let dragOffset = { x: 0, y: 0 };
-
-let isResizing = false;
-let resizeHandle = null;
+let dragStart = null;
 
 function getBounds(el) {
   return {
@@ -22,111 +19,97 @@ function isInside(el, mouse) {
   return mouse.x >= x1 && mouse.x <= x2 && mouse.y >= y1 && mouse.y <= y2;
 }
 
-function getHandle(el, mouse) {
-  const size = 10;
-  const { x1, y1, x2, y2 } = getBounds(el);
-
-  const handles = {
-    tl: { x: x1, y: y1 },
-    tr: { x: x2, y: y1 },
-    bl: { x: x1, y: y2 },
-    br: { x: x2, y: y2 },
-  };
-
-  for (let key in handles) {
-    const h = handles[key];
-    if (Math.abs(mouse.x - h.x) < size && Math.abs(mouse.y - h.y) < size) {
-      return key;
-    }
-  }
-
-  return null;
-}
-
 export const selectTool = {
   onMouseDown(e) {
     const mouse = screenToWorld(e.clientX, e.clientY);
 
-    state.selectedElement = null;
-    window.updateQuickActions?.();
+    dragStart = mouse;
+    isDragging = false;
 
+    // 🔥 check if clicked on element
     for (let i = state.elements.length - 1; i >= 0; i--) {
       const el = state.elements[i];
 
       if (isInside(el, mouse)) {
         state.selectedElement = el;
-        window.updateQuickActions?.();
 
-        // 🔥 LOCK CHECK (block interaction)
-        if (el.locked) {
-          return; // selectable but not draggable/resizable
-        }
-
-        resizeHandle = getHandle(el, mouse);
-
-        if (resizeHandle) {
-          isResizing = true;
-          isDragging = false;
-          return;
+        // 🔥 if already selected → keep group
+        if (!state.selectedElements.includes(el)) {
+          state.selectedElements = [el];
         }
 
         isDragging = true;
-        dragOffset.x = mouse.x - el.x;
-        dragOffset.y = mouse.y - el.y;
-
         return;
       }
     }
+
+    // 🔥 start box select
+    state.selectedElement = null;
+    state.selectedElements = [];
+    state.selectionBox = {
+      x: mouse.x,
+      y: mouse.y,
+      w: 0,
+      h: 0,
+    };
   },
 
   onMouseMove(e) {
     const mouse = screenToWorld(e.clientX, e.clientY);
-    const el = state.selectedElement;
-    if (!el || el.locked) return; // 🔥 block movement
 
-    // 🔥 DRAG
-    if (isDragging) {
-      el.x = mouse.x - dragOffset.x;
-      el.y = mouse.y - dragOffset.y;
+    // ================= BOX SELECT =================
+    if (state.selectionBox) {
+      state.selectionBox.w = mouse.x - state.selectionBox.x;
+      state.selectionBox.h = mouse.y - state.selectionBox.y;
+      return;
     }
 
-    // 🔥 RESIZE
-    if (isResizing) {
-      if (resizeHandle === "br") {
-        el.w = mouse.x - el.x;
-        el.h = mouse.y - el.y;
-      }
+    // ================= DRAG MULTI =================
+    if (isDragging && state.selectedElements.length > 0) {
+      const dx = mouse.x - dragStart.x;
+      const dy = mouse.y - dragStart.y;
 
-      if (resizeHandle === "tr") {
-        el.w = mouse.x - el.x;
-        el.h = el.y + el.h - mouse.y;
-        el.y = mouse.y;
-      }
+      state.selectedElements.forEach((el) => {
+        if (el.locked) return;
 
-      if (resizeHandle === "bl") {
-        el.w = el.x + el.w - mouse.x;
-        el.h = mouse.y - el.y;
-        el.x = mouse.x;
-      }
+        el.x += dx;
+        el.y += dy;
+      });
 
-      if (resizeHandle === "tl") {
-        el.w = el.x + el.w - mouse.x;
-        el.h = el.y + el.h - mouse.y;
-        el.x = mouse.x;
-        el.y = mouse.y;
-      }
+      // 🔥 update reference point
+      dragStart = mouse;
     }
   },
 
   onMouseUp() {
-    const changed = isDragging || isResizing;
+    // ================= FINISH BOX SELECT =================
+    if (state.selectionBox) {
+      const box = state.selectionBox;
 
-    isDragging = false;
-    isResizing = false;
-    resizeHandle = null;
+      const x1 = Math.min(box.x, box.x + box.w);
+      const x2 = Math.max(box.x, box.x + box.w);
+      const y1 = Math.min(box.y, box.y + box.h);
+      const y2 = Math.max(box.y, box.y + box.h);
 
-    if (changed) {
+      state.selectedElements = state.elements.filter((el) => {
+        return (
+          el.x < x2 &&
+          el.x + el.w > x1 &&
+          el.y < y2 &&
+          el.y + el.h > y1
+        );
+      });
+
+      state.selectedElement = state.selectedElements[0] || null;
+
+      state.selectionBox = null;
       saveState();
     }
+
+    if (isDragging) {
+      saveState();
+    }
+
+    isDragging = false;
   },
 };

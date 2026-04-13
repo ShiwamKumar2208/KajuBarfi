@@ -15,6 +15,9 @@ export const state = {
   history: [],
   historyIndex: -1,
 
+  selectedElements: [],
+  selectionBox: null,
+
   currentTool: "select",
   nextId: 1,
 
