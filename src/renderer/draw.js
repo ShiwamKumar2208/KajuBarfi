@@ -23,6 +23,7 @@ export function draw(ctx, canvas) {
 
   ctx.restore();
 
+  // TODO: add screen magnifier
   // ================= TRAIL =================
 
   if (state.trailEnabled) {
