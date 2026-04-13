@@ -3,6 +3,7 @@ const KEY = "kaju-settings";
 const defaultSettings = {
   theme: "dark",
   grid: "square",
+  trail: false, // 🔥 added
 };
 
 const themes = {
@@ -31,7 +32,7 @@ function loadSettings() {
     const saved = JSON.parse(localStorage.getItem(KEY));
     return { ...defaultSettings, ...saved };
   } catch {
-    return defaultSettings;
+    return { ...defaultSettings };
   }
 }
 
@@ -55,6 +56,12 @@ export function toggleTheme() {
 
 export function toggleGrid() {
   settings.grid = settings.grid === "square" ? "diamond" : "square";
+  saveSettings();
+}
+
+// 🔥 NEW
+export function toggleTrail() {
+  settings.trail = !settings.trail;
   saveSettings();
 }
 

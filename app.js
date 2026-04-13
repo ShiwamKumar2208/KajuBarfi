@@ -10,6 +10,7 @@ import {
   getSettings,
   toggleTheme,
   toggleGrid,
+  toggleTrail,
   applyTheme,
 } from "./src/utils/settings.js";
 import { ensureImage } from "./src/utils/image.js";
@@ -17,11 +18,9 @@ import { ensureImage } from "./src/utils/image.js";
 // ================= GLOBAL MOUSE =================
 
 window.addEventListener("mousemove", (e) => {
-  // 🔥 always track mouse (for magnifier)
   state.mouse.x = e.clientX;
   state.mouse.y = e.clientY;
 
-  // 🔥 trail
   if (!state.trailEnabled) return;
 
   state.trail.push({
@@ -34,8 +33,6 @@ window.addEventListener("mousemove", (e) => {
 });
 
 // ================= MAGNIFIER =================
-
-let magnifierKeyActive = false;
 
 window.addEventListener("keydown", (e) => {
   if (e.ctrlKey || e.metaKey) return;
@@ -144,7 +141,7 @@ const gridBtn = document.getElementById("gridToggle");
 const trailBtn = document.getElementById("trailToggle");
 
 function updateSettingsUI() {
-  const { theme, grid } = getSettings();
+  const { theme, grid, trail } = getSettings();
 
   if (themeBtn) {
     themeBtn.textContent = theme === "dark" ? "🌙" : "🌞";
@@ -152,6 +149,10 @@ function updateSettingsUI() {
 
   if (gridBtn) {
     gridBtn.textContent = grid === "square" ? "🟧" : "🔶";
+  }
+
+  if (trailBtn) {
+    trailBtn.classList.toggle("active", trail);
   }
 
   applyTheme();
@@ -168,7 +169,11 @@ gridBtn?.addEventListener("click", () => {
 });
 
 trailBtn?.addEventListener("click", () => {
-  state.trailEnabled = !state.trailEnabled;
+  toggleTrail();
+
+  const settings = getSettings();
+  state.trailEnabled = settings.trail;
+
   trailBtn.classList.toggle("active", state.trailEnabled);
 });
 
@@ -442,6 +447,9 @@ window.addEventListener("resize", () => {
 });
 
 // ================= INIT =================
+
+const settings = getSettings();
+state.trailEnabled = settings.trail;
 
 applyTheme();
 updateSettingsUI();
