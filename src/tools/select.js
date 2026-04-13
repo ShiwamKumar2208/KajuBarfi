@@ -227,13 +227,15 @@ export const selectTool = {
       const y2 = Math.max(box.y, box.y + box.h);
 
       const newSelection = state.elements.filter((el) => {
-        return (
-          el.x < x2 &&
-          el.x + el.w > x1 &&
-          el.y < y2 &&
-          el.y + el.h > y1
-        );
-      });
+      const b = getBounds(el);
+
+      return (
+        b.x1 < x2 &&
+        b.x2 > x1 &&
+        b.y1 < y2 &&
+        b.y2 > y1
+      );
+    });
 
       if (e.shiftKey) {
         const set = new Set(state.selectedElements);

@@ -1,6 +1,8 @@
 .
 ├── app.js
+├── idea.js
 ├── index.html
+├── LICENSE.txt
 ├── logo.png
 ├── README.md
 ├── src
@@ -31,4 +33,4 @@
 ├── tree.txt
 └── wel.png
 
-6 directories, 27 files
+6 directories, 28 files
