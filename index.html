@@ -27,6 +27,13 @@
       <button data-tool="text" ttip="Text">T</button>
       <button data-tool="sketch" ttip="Sketch">✏️</button>
       <button data-tool="eraser" ttip="Eraser">🧽</button>
+      <div id="colorControl">
+        <button id="colorBtn" ttip="Color">
+          <span id="colorPreview"></span>
+        </button>
+        <input type="color" id="colorPicker" hidden />
+      </div>
+      <button id="sketchColorToggle" ttip="Toggle Sketch Color">🎨✏️</button>
       <button id="themeToggle" ttip="Toggle Theme">🌙</button>
       <button id="gridToggle" ttip="Toggle Grid Style">🔶</button>
       <button id="trailToggle" ttip="Mouse Trail">✨</button>
@@ -182,6 +189,7 @@
         <p>Exporting… this may take a moment</p>
       </div>
     </div>
+
     <script type="module" src="app.js"></script>
   </body>
 </html>

@@ -2,8 +2,11 @@ import { state } from "../state.js";
 import { screenToWorld } from "../utils/camera.js";
 import { saveState } from "../utils/history.js";
 import { eraserTool } from "./eraser.js";
+import { getSettings } from "../utils/settings.js";
 
 let currentStroke = null;
+
+const { sketchColorEnabled } = getSettings();
 
 export const sketchTool = {
   onMouseDown(e) {
@@ -19,7 +22,7 @@ export const sketchTool = {
       id: state.nextId++,
       type: "sketch",
       points: [mouse],
-      color: null,
+      color: sketchColorEnabled ? state.currentColor : null,
       width: 2,
     };
 

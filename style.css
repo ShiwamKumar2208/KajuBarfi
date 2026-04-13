@@ -528,3 +528,28 @@ body.hide-cursor * {
     transform: translateY(0) scale(1);
   }
 }
+
+#colorBtn {
+  width: 42px;
+  height: 32px;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#colorPreview {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  background: #f5d6a3;
+  border: 1px solid #aaa;
+}
+
+#colorPicker {
+  margin-left: 25px;
+  margin-top: 25px;
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}

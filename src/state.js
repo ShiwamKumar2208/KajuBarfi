@@ -15,6 +15,8 @@ export const state = {
   history: [],
   historyIndex: -1,
 
+  currentColor: "#f5d6a3", 
+
   hoverHandle: null,
   hoverElement: null,
 
