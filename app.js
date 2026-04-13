@@ -14,7 +14,14 @@ import {
 } from "./src/utils/settings.js";
 import { ensureImage } from "./src/utils/image.js";
 
+// ================= GLOBAL MOUSE =================
+
 window.addEventListener("mousemove", (e) => {
+  // 🔥 always track mouse (for magnifier)
+  state.mouse.x = e.clientX;
+  state.mouse.y = e.clientY;
+
+  // 🔥 trail
   if (!state.trailEnabled) return;
 
   state.trail.push({
@@ -24,6 +31,28 @@ window.addEventListener("mousemove", (e) => {
   });
 
   if (state.trail.length > 80) state.trail.shift();
+});
+
+// ================= MAGNIFIER =================
+
+window.addEventListener("keydown", (e) => {
+  if (e.key.toLowerCase() === "z") {
+    state.magnifierEnabled = true;
+  }
+
+  if (e.key === "Alt") {
+    state.magnifierEnabled = true;
+  }
+});
+
+window.addEventListener("keyup", (e) => {
+  if (e.key.toLowerCase() === "z") {
+    state.magnifierEnabled = false;
+  }
+
+  if (e.key === "Alt") {
+    state.magnifierEnabled = false;
+  }
 });
 
 // ================= QUICK ACTIONS =================
@@ -108,6 +137,7 @@ qaLock.onclick = () => {
 
 const themeBtn = document.getElementById("themeToggle");
 const gridBtn = document.getElementById("gridToggle");
+const trailBtn = document.getElementById("trailToggle");
 
 function updateSettingsUI() {
   const { theme, grid } = getSettings();
@@ -131,6 +161,11 @@ themeBtn?.addEventListener("click", () => {
 gridBtn?.addEventListener("click", () => {
   toggleGrid();
   updateSettingsUI();
+});
+
+trailBtn?.addEventListener("click", () => {
+  state.trailEnabled = !state.trailEnabled;
+  trailBtn.classList.toggle("active", state.trailEnabled);
 });
 
 // ================= HELP =================
@@ -287,7 +322,7 @@ canvas.addEventListener("drop", (e) => {
   reader.readAsDataURL(file);
 });
 
-// ================= FILE LOAD (FIXED) =================
+// ================= FILE LOAD =================
 
 document.getElementById("fileInput").addEventListener("change", (e) => {
   const file = e.target.files[0];
@@ -313,7 +348,6 @@ document.getElementById("fileInput").addEventListener("change", (e) => {
       });
 
       Object.assign(state.camera, data.camera || {});
-
       state.selectedElement = null;
 
       updateQuickActions();
@@ -325,13 +359,6 @@ document.getElementById("fileInput").addEventListener("change", (e) => {
   };
 
   reader.readAsText(file);
-});
-
-const trailBtn = document.getElementById("trailToggle");
-
-trailBtn?.addEventListener("click", () => {
-  state.trailEnabled = !state.trailEnabled;
-  trailBtn.classList.toggle("active", state.trailEnabled);
 });
 
 // ================= PANNING =================
