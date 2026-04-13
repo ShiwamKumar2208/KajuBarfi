@@ -18,6 +18,9 @@ export const state = {
   currentTool: "select",
   nextId: 1,
 
+  magnifierEnabled: false,
+  mouse: { x: 0, y: 0 },
+
   trailEnabled: false,   // ✅ toggle
   trail: [],             // ✅ actual data (THIS replaces your local variable)
 
