@@ -1,12 +1,7 @@
 // TODO: implement multiselect
 // TODO: implement color system
 // TODO: create own text system
-// TODO: upgrade magnifier
 
-// 1. 🎯 Magnifier upgrade (HIGH IMPACT)
-// soft edges (feathered circle)
-// crosshair in center
-// smoother zoom (lerp instead of snap)
 // 2. 🧠 Multi-select (REAL productivity jump)
 // box select
 // move multiple elements
