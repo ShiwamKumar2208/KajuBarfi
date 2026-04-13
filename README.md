@@ -3,7 +3,7 @@
 ![Preview](wel.png)
 
 ![Status](https://img.shields.io/badge/status-active-brightgreen)
-![Version](https://img.shields.io/badge/version-3.14.0-blue)
+![Version](https://img.shields.io/badge/version-7.3.14-purple)
 ![Built With](https://img.shields.io/badge/built%20with-vanilla%20JS-yellow)
 
 A fast, minimal, no-nonsense canvas-based whiteboard built from scratch.
@@ -22,7 +22,7 @@ No install. No dependencies.
 
 ## 📦 Version
 
-Current version: **3.14.0**
+Current version: **7.3.14**
 
 
 ## ✨ Features
@@ -34,6 +34,10 @@ Current version: **3.14.0**
 - Eraser tool
 - Image support (URL + drag & drop)
 
+### 🧠 Toggle Features
+- Dark theme
+- grid change
+- mouse trail
 
 ### 🧠 Smart Interaction
 - Select, drag, and resize elements
@@ -41,6 +45,7 @@ Current version: **3.14.0**
 - Lock / unlock elements (Ctrl + L)
 - Duplicate elements (Ctrl + D)
 - Precise movement (Ctrl + Arrow keys)
+- Z / Alt to activate Screen Magnifier
 
 
 ### ⚡ Quick Actions UI
