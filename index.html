@@ -138,6 +138,27 @@
         </div>
       </div>
     </div>
+    <div id="inputModal" class="help-modal hidden">
+      <div class="help-content modern text-modal">
+        <div class="help-header">
+          <h2 id="inputModalTitle">Input</h2>
+          <button id="closeInputModal">✖</button>
+        </div>
+
+        <input id="inputField" type="text" />
+
+        <!-- 🔥 ERROR -->
+        <div id="inputError" class="input-error"></div>
+
+        <!-- 🔥 PREVIEW -->
+        <div id="inputPreview" class="input-preview hidden"></div>
+
+        <div class="text-actions">
+          <button id="cancelInput">Cancel</button>
+          <button id="applyInput">Apply</button>
+        </div>
+      </div>
+    </div>
 
     <script type="module" src="app.js"></script>
   </body>

@@ -7,9 +7,7 @@ const ENABLE_TEXT_WRAP = true;
 function drawSelection(ctx, el, zoom) {
   const colors = getThemeColors();
 
-  ctx.strokeStyle = el.locked
-    ? (colors.locked || "#ff4d4d")
-    : colors.selection;
+  ctx.strokeStyle = el.locked ? colors.locked || "#ff4d4d" : colors.selection;
 
   const x1 = Math.min(el.x, el.x + el.w);
   const y1 = Math.min(el.y, el.y + el.h);
@@ -86,7 +84,7 @@ export function drawElements(ctx) {
       ctx.textBaseline = "top";
 
       // 🔥 FIX: stable width source
-      const baseWidth = el.fixedWidth ? el.w : (Math.abs(el.w) || 200);
+      const baseWidth = el.fixedWidth ? el.w : Math.abs(el.w) || 200;
       const maxWidth = ENABLE_TEXT_WRAP ? baseWidth : Infinity;
 
       function wrapText(text, maxWidth) {
@@ -124,23 +122,26 @@ export function drawElements(ctx) {
       // 🔥 IMPORTANT: only update height ALWAYS
       el.h = fontSize * lines.length;
 
-      // 🔥 width update ONLY if not fixed
+      const widest = Math.max(
+        ...lines.map((line) => ctx.measureText(line).width),
+        0,
+      );
+
+      // 🔥 ALWAYS ensure width fits text
       if (!el.fixedWidth) {
-        const widest = Math.max(
-          ...lines.map((line) => ctx.measureText(line).width),
-          0,
-        );
         el.w = widest;
+      } else {
+        // 🔥 FIX: expand if text overflows box
+        if (widest > el.w) {
+          el.w = widest;
+        }
       }
     }
 
     // if (state.selectedElement === el) {
     //   drawSelection(ctx, el, state.camera.zoom);
     // }
-    if (
-      state.selectedElements?.includes(el) ||
-      state.selectedElement === el
-    ) {
+    if (state.selectedElements?.includes(el) || state.selectedElement === el) {
       drawSelection(ctx, el, state.camera.zoom);
     }
   });

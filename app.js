@@ -11,6 +11,7 @@ import { setupSettingsUI } from "./src/ui/settingsUI.js";
 import { setupQuickActions } from "./src/ui/quickActions.js";
 import { setupTooltip } from "./src/ui/tooltip.js";
 import { setupTextModal } from "./src/ui/textModal.js";
+import { setupInputModal } from "./src/ui/inputModal.js";
 
 import { setupFiles } from "./src/features/files.js";
 
@@ -33,6 +34,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setupQuickActions();
   setupTooltip();
   setupTextModal();
+  setupInputModal();
 
   // ================= SETTINGS =================
   const settings = getSettings();

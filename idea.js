@@ -1,5 +1,4 @@
 // TODO: implement color system
-// TODO: create own text system
 // TODO: correct sketch tool
 // TODO: add eraser for sketch
 

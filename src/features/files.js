@@ -7,16 +7,38 @@ import { ensureImage } from "../utils/image.js";
 export function setupFiles(canvas) {
   // ================= SAVE =================
   document.querySelector('[data-action="save"]').onclick = () => {
-    const name = prompt("File name:", "board.kj");
-    if (!name) return;
-    saveFile(name);
+    window.openInputModal({
+      titleText: "Save File",
+      placeholder: "board.kj",
+      onSubmit: (name) => {
+        let finalName = name || "board.kj"; // 🔥 fallback
+
+        // 🔥 auto extension
+        if (!finalName.endsWith(".kj")) {
+          finalName += ".kj";
+        }
+
+        saveFile(finalName);
+      },
+    });
   };
 
   // ================= EXPORT =================
   document.querySelector('[data-action="export"]').onclick = () => {
-    const name = prompt("File name:", "kaju.png");
-    if (!name) return;
-    exportPNG(canvas, name);
+    window.openInputModal({
+      titleText: "Export PNG",
+      placeholder: "kaju.png",
+      onSubmit: (name) => {
+        let finalName = name || "kaju.png";
+
+        // 🔥 auto extension
+        if (!finalName.endsWith(".png")) {
+          finalName += ".png";
+        }
+
+        exportPNG(canvas, finalName);
+      },
+    });
   };
 
   // ================= LOAD =================
@@ -37,7 +59,6 @@ export function setupFiles(canvas) {
       try {
         const data = JSON.parse(ev.target.result);
 
-        // reset
         state.elements.length = 0;
 
         data.elements.forEach((el) => {
@@ -57,44 +78,59 @@ export function setupFiles(canvas) {
 
         window.updateQuickActions?.();
         saveState();
-
       } catch {
         alert("Invalid file!");
       }
     };
 
     reader.readAsText(file);
-
-    // 🔥 important: reset input so same file can be loaded again
     fileInput.value = "";
   });
 
   // ================= IMAGE URL =================
   document.querySelector('[data-action="image-url"]').onclick = () => {
-    const url = prompt("Enter image URL:");
-    if (!url) return;
+    window.openInputModal({
+      titleText: "Add Image URL",
+      placeholder: "https://...",
+      onSubmit: (url, ui) => {
+        ui.clearError();
 
-    const img = new Image();
-    img.src = url;
+        try {
+          new URL(url);
+        } catch {
+          ui.setError("Invalid URL");
+          return;
+        }
 
-    img.onload = () => {
-      const el = {
-        id: state.nextId++,
-        type: "image",
-        x: state.camera.x,
-        y: state.camera.y,
-        w: img.width / 2,
-        h: img.height / 2,
-        src: url,
-        locked: false,
-      };
+        const img = new Image();
+        img.src = url;
 
-      state.elements.push(el);
-      state.selectedElement = el;
+        img.onload = () => {
+          const el = {
+            id: state.nextId++,
+            type: "image",
+            x: state.camera.x,
+            y: state.camera.y,
+            w: img.width / 2,
+            h: img.height / 2,
+            src: url,
+            locked: false,
+          };
 
-      window.updateQuickActions?.();
-      saveState();
-    };
+          state.elements.push(el);
+          state.selectedElement = el;
+
+          window.updateQuickActions?.();
+          saveState();
+
+          ui.close(); // 🔥 close only on success
+        };
+
+        img.onerror = () => {
+          ui.setError("Image failed to load");
+        };
+      },
+    });
   };
 
   // ================= DRAG & DROP =================

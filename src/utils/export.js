@@ -11,7 +11,7 @@ export function exportPNG(canvas, name = "kaju.png") {
 
   const colors = getThemeColors();
 
-  // 🔥 correct background (theme-based)
+  // 🔥 background
   ctx.fillStyle = colors.bg;
   ctx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
 
@@ -28,7 +28,7 @@ export function exportPNG(canvas, name = "kaju.png") {
 
     if (el.type === "sketch") {
       ctx.strokeStyle = el.color || colors.stroke;
-      ctx.lineWidth = el.width / state.camera.zoom; // 🔥 fix thickness
+      ctx.lineWidth = el.width / state.camera.zoom;
 
       ctx.beginPath();
       el.points.forEach((p, i) => {
@@ -95,7 +95,17 @@ export function exportPNG(canvas, name = "kaju.png") {
   const link = document.createElement("a");
   const finalName = name.endsWith(".png") ? name : name + ".png";
 
-  link.download = finalName;
-  link.href = exportCanvas.toDataURL("image/png");
-  link.click();
+  // 🔥 CRITICAL FIX (CORS / tainted canvas)
+  try {
+    link.download = finalName;
+    link.href = exportCanvas.toDataURL("image/png");
+    link.click();
+  } catch (e) {
+    // 🔥 show modal instead of crash
+    window.openInputModal({
+      titleText: "Export Failed",
+      placeholder: "Some external images cannot be exported",
+      readOnly: true,
+    });
+  }
 }
