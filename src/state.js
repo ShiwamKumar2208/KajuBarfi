@@ -15,6 +15,9 @@ export const state = {
   history: [],
   historyIndex: -1,
 
+  hoverHandle: null,
+  hoverElement: null,
+
   selectedElements: [],
   selectionBox: null,
 

@@ -9,6 +9,8 @@ let resizeHandle = null;
 let isMouseDown = false;
 const DRAG_THRESHOLD = 4;
 
+// ================= HELPERS =================
+
 function getBounds(el) {
   return {
     x1: Math.min(el.x, el.x + el.w),
@@ -23,8 +25,10 @@ function isInside(el, mouse) {
   return mouse.x >= x1 && mouse.x <= x2 && mouse.y >= y1 && mouse.y <= y2;
 }
 
+// 🔥 SIMPLE + RELIABLE HANDLE DETECTION
 function getHandle(el, mouse) {
-  const size = 10;
+  const size = Math.max(12 / state.camera.zoom, 8);
+
   const { x1, y1, x2, y2 } = getBounds(el);
 
   const handles = {
@@ -36,6 +40,7 @@ function getHandle(el, mouse) {
 
   for (let key in handles) {
     const h = handles[key];
+
     if (
       Math.abs(mouse.x - h.x) < size &&
       Math.abs(mouse.y - h.y) < size
@@ -47,6 +52,8 @@ function getHandle(el, mouse) {
   return null;
 }
 
+// ================= TOOL =================
+
 export const selectTool = {
   onMouseDown(e) {
     const mouse = screenToWorld(e.clientX, e.clientY);
@@ -55,7 +62,6 @@ export const selectTool = {
     isMouseDown = true;
     mode = null;
 
-    // 🔥 check elements (top first)
     for (let i = state.elements.length - 1; i >= 0; i--) {
       const el = state.elements[i];
 
@@ -81,13 +87,14 @@ export const selectTool = {
           } else {
             state.selectedElements.push(el);
           }
+          return; // 🔥 no drag on shift click
         } else {
           if (!state.selectedElements.includes(el)) {
             state.selectedElements = [el];
           }
         }
 
-        return; // ⚠️ DO NOT start drag yet
+        return;
       }
     }
 
@@ -110,6 +117,42 @@ export const selectTool = {
   onMouseMove(e) {
     const mouse = screenToWorld(e.clientX, e.clientY);
 
+    // ================= HOVER DETECTION =================
+    state.hoverHandle = null;
+
+    for (let i = state.elements.length - 1; i >= 0; i--) {
+      const el = state.elements[i];
+
+      if (isInside(el, mouse)) {
+        const handle = getHandle(el, mouse);
+
+        if (handle) {
+          state.hoverHandle = handle;
+          break;
+        }
+      }
+    }
+
+    // ================= CURSOR =================
+    const canvas = document.getElementById("canvas");
+
+    if (!state.magnifierEnabled) {
+      if (state.hoverHandle) {
+        const map = {
+          tl: "nwse-resize",
+          br: "nwse-resize",
+          tr: "nesw-resize",
+          bl: "nesw-resize",
+        };
+
+        canvas.style.cursor = map[state.hoverHandle];
+      } else if (mode === "drag") {
+        canvas.style.cursor = "grabbing";
+      } else {
+        canvas.style.cursor = "default";
+      }
+    }
+
     // ================= BOX =================
     if (mode === "box" && state.selectionBox) {
       state.selectionBox.w = mouse.x - state.selectionBox.x;
@@ -122,7 +165,6 @@ export const selectTool = {
       const dx = mouse.x - dragStart.x;
       const dy = mouse.y - dragStart.y;
 
-      // 🔥 threshold check
       if (!mode) {
         if (Math.abs(dx) > DRAG_THRESHOLD || Math.abs(dy) > DRAG_THRESHOLD) {
           mode = "drag";
@@ -175,9 +217,7 @@ export const selectTool = {
   },
 
   onMouseUp(e) {
-    const mouse = screenToWorld(e.clientX, e.clientY);
-
-    // ================= FINISH BOX =================
+    // ================= BOX COMPLETE =================
     if (mode === "box" && state.selectionBox) {
       const box = state.selectionBox;
 
@@ -204,7 +244,6 @@ export const selectTool = {
       }
 
       state.selectedElement = state.selectedElements[0] || null;
-
       state.selectionBox = null;
     }
 
