@@ -22,8 +22,7 @@ export function draw(ctx, canvas) {
   window.updateQuickActions?.();
 
   ctx.restore();
-
-  // TODO: add screen magnifier
+  
   // ================= TRAIL =================
 
   if (state.trailEnabled) {
