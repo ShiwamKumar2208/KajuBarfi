@@ -92,12 +92,13 @@ window.updateQuickActions = updateQuickActions;
 // ================= QUICK ACTION BUTTONS =================
 
 qaDelete.onclick = () => {
-  if (!state.selectedElement) return;
+  if (!state.selectedElements.length) return;
 
   state.elements = state.elements.filter(
-    (el) => el !== state.selectedElement
+    (el) => !state.selectedElements.includes(el)
   );
 
+  state.selectedElements = [];
   state.selectedElement = null;
 
   saveState();
@@ -352,6 +353,7 @@ document.getElementById("fileInput").addEventListener("change", (e) => {
 
       Object.assign(state.camera, data.camera || {});
       state.selectedElement = null;
+      state.selectedElements = [];
 
       updateQuickActions();
       saveState();
@@ -408,9 +410,9 @@ canvas.addEventListener("mousemove", (e) => {
   tools[state.currentTool]?.onMouseMove?.(e);
 });
 
-window.addEventListener("mouseup", () => {
+canvas.addEventListener("mouseup", (e) => {
   isPanning = false;
-  tools[state.currentTool]?.onMouseUp?.();
+  tools[state.currentTool]?.onMouseUp?.(e);
 });
 
 // ================= ZOOM =================
