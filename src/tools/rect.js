@@ -3,6 +3,26 @@ import { screenToWorld } from "../utils/camera.js";
 import { saveState } from "../utils/history.js";
 
 let current = null;
+let isFirstRect = true;
+
+const DEFAULT_RECT_COLOR = "#f5d6a3"; // 🔥 kaju color
+
+const palette = [
+  "#f5d6a3", "#ffd6e0", "#d6f5e3", "#d6e0ff",
+  "#fff0d6", "#e0d6ff", "#d6fff5"
+];
+
+let lastColor = null;
+
+function randomPastel() {
+  let color;
+  do {
+    color = palette[Math.floor(Math.random() * palette.length)];
+  } while (color === lastColor);
+
+  lastColor = color;
+  return color;
+}
 
 function isInside(el, mouse) {
   const x1 = Math.min(el.x, el.x + el.w);
@@ -17,21 +37,32 @@ export const rectTool = {
   onMouseDown(e) {
     const mouse = screenToWorld(e.clientX, e.clientY);
 
-    // 🔥 CTRL + CLICK → APPLY CURRENT COLOR TO EXISTING RECT
+    // 🔥 CTRL + CLICK → CHANGE COLOR
     if (e.ctrlKey) {
       for (let i = state.elements.length - 1; i >= 0; i--) {
         const el = state.elements[i];
 
         if (el.type === "rect" && isInside(el, mouse)) {
-          el.color = state.currentColor;
-          state.selectedElement = el;
-          saveState();
+          const newColor = prompt(
+            "Enter color (hex or name):",
+            el.color || DEFAULT_RECT_COLOR,
+          );
+
+          if (newColor) {
+            el.color = newColor;
+            state.selectedElement = el; // 🔥 also select it
+            saveState();
+          }
+
           return;
         }
       }
     }
 
-    // 🔥 CREATE RECT (uses global color system)
+    // 🔥 CREATE RECT
+    const color = isFirstRect ? "#f5d6a3" : randomPastel();
+    isFirstRect = false;
+
     const rect = {
       id: state.nextId++,
       type: "rect",
@@ -39,7 +70,7 @@ export const rectTool = {
       y: mouse.y,
       w: 0,
       h: 0,
-      color: state.currentColor || "#f5d6a3", // fallback
+      color,
       locked: false,
     };
 

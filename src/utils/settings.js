@@ -3,7 +3,6 @@ const KEY = "kaju-settings";
 const defaultSettings = {
   theme: "dark",
   grid: "square",
-  sketchColorEnabled: false,
   trail: false, // 🔥 added
 };
 
@@ -39,15 +38,6 @@ function loadSettings() {
 
 function saveSettings() {
   localStorage.setItem(KEY, JSON.stringify(settings));
-}
-
-export function isSketchColorEnabled() {
-  return settings.sketchColorEnabled;
-}
-
-export function toggleSketchColor() {
-  settings.sketchColorEnabled = !settings.sketchColorEnabled;
-  saveSettings();
 }
 
 export function getSettings() {
