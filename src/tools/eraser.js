@@ -62,6 +62,8 @@ function eraseAt(mouse) {
 
 export const eraserTool = {
   onMouseDown(e) {
+    if (state.magnifierEnabled) return; // 🔥 magnifier priority
+
     const mouse = screenToWorld(e.clientX, e.clientY);
  
     if (state.selectedElements.length > 0) {
@@ -77,7 +79,7 @@ export const eraserTool = {
       // 🔥 only delete if you actually clicked ON selection
       if (clickedSelected) {
         state.elements = state.elements.filter(
-          (el) => !state.selectedElements.includes(el),
+          (el) => !state.selectedElements.includes(el)
         );
 
         state.selectedElements = [];
@@ -94,7 +96,7 @@ export const eraserTool = {
   },
 
   onMouseMove(e) {
-    if (!isDragging) return;
+    if (!isDragging || state.magnifierEnabled) return;
 
     const mouse = screenToWorld(e.clientX, e.clientY);
     eraseAt(mouse);

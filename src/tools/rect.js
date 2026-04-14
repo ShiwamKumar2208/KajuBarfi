@@ -4,6 +4,7 @@ import { saveState } from "../utils/history.js";
 
 let current = null;
 let isFirstRect = true;
+let justFinished = false; 
 
 const DEFAULT_RECT_COLOR = "#f5d6a3"; // 🔥 kaju color
 
@@ -35,6 +36,11 @@ function isInside(el, mouse) {
 
 export const rectTool = {
   onMouseDown(e) {
+    if (justFinished) {
+      justFinished = false;
+      return; // 🔥 ignore accidental click
+    }
+
     const mouse = screenToWorld(e.clientX, e.clientY);
 
     // 🔥 CTRL + CLICK → CHANGE COLOR
@@ -94,6 +100,7 @@ export const rectTool = {
   onMouseUp() {
     if (current) {
       saveState();
+      justFinished = true;
     }
     current = null;
   },
