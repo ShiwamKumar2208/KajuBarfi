@@ -138,15 +138,8 @@ keyboard handling
 -   Avoid unnecessary abstraction
 -   Full control over behavior
 
-## ⚠️ Limitations
-
--   No multi-select (yet)
--   No backend sync
--   Text system is intentionally simple
-
 ## 🛠 Future Ideas
 
--   Box selection (multi-select)
 -   Snap to grid / alignment guides
 -   Color picker UI
 -   Grouping system
