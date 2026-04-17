@@ -16,6 +16,11 @@ export function setupQuickActions() {
       return;
     }
 
+    if (el?.deleting) {
+      qa.classList.remove("active");
+      return;
+    }
+
     qa.classList.add("active");
 
     const zoom = state.camera.zoom;

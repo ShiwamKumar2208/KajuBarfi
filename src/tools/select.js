@@ -25,7 +25,7 @@ function isInside(el, mouse) {
   return mouse.x >= x1 && mouse.x <= x2 && mouse.y >= y1 && mouse.y <= y2;
 }
 
-// 🔥 SIMPLE + RELIABLE HANDLE DETECTION
+// 🔥 HANDLE DETECTION
 function getHandle(el, mouse) {
   const size = Math.max(12 / state.camera.zoom, 8);
 
@@ -65,6 +65,8 @@ export const selectTool = {
     for (let i = state.elements.length - 1; i >= 0; i--) {
       const el = state.elements[i];
 
+      if (el.deleting) continue; // 🔥 FIX
+
       if (isInside(el, mouse)) {
         resizeHandle = getHandle(el, mouse);
 
@@ -87,7 +89,7 @@ export const selectTool = {
           } else {
             state.selectedElements.push(el);
           }
-          return; // 🔥 no drag on shift click
+          return;
         } else {
           if (!state.selectedElements.includes(el)) {
             state.selectedElements = [el];
@@ -117,11 +119,13 @@ export const selectTool = {
   onMouseMove(e) {
     const mouse = screenToWorld(e.clientX, e.clientY);
 
-    // ================= HOVER DETECTION =================
+    // ================= HOVER =================
     state.hoverHandle = null;
 
     for (let i = state.elements.length - 1; i >= 0; i--) {
       const el = state.elements[i];
+
+      if (el.deleting) continue; // 🔥 FIX
 
       if (isInside(el, mouse)) {
         const handle = getHandle(el, mouse);
@@ -175,7 +179,7 @@ export const selectTool = {
 
       if (mode === "drag") {
         state.selectedElements.forEach((el) => {
-          if (el.locked) return;
+          if (el.locked || el.deleting) return; // 🔥 FIX
 
           el.x += dx;
           el.y += dy;
@@ -189,6 +193,8 @@ export const selectTool = {
     // ================= RESIZE =================
     if (mode === "resize" && state.selectedElement) {
       const el = state.selectedElement;
+
+      if (el.deleting) return; // 🔥 FIX
 
       if (resizeHandle === "br") {
         el.w = mouse.x - el.x;
@@ -227,15 +233,17 @@ export const selectTool = {
       const y2 = Math.max(box.y, box.y + box.h);
 
       const newSelection = state.elements.filter((el) => {
-      const b = getBounds(el);
+        if (el.deleting) return false; // 🔥 FIX
 
-      return (
-        b.x1 < x2 &&
-        b.x2 > x1 &&
-        b.y1 < y2 &&
-        b.y2 > y1
-      );
-    });
+        const b = getBounds(el);
+
+        return (
+          b.x1 < x2 &&
+          b.x2 > x1 &&
+          b.y1 < y2 &&
+          b.y2 > y1
+        );
+      });
 
       if (e.shiftKey) {
         const set = new Set(state.selectedElements);
