@@ -45,14 +45,20 @@ function drawSelection(ctx, el, zoom) {
 export function drawElements(ctx) {
   const colors = getThemeColors();
 
+  // 🔥 IMPORTANT: iterate copy (we'll mutate later)
   state.elements.slice().forEach((el) => {
     if (el.locked === undefined) el.locked = false;
 
-    // ================= ANIMATION STATE =================
+    // ================= FADE LOGIC =================
     if (el.deleting) {
-      el.opacity = (el.opacity ?? 1) * 0.85;
+      el.opacity = (el.opacity ?? 1);
 
+      // 🔥 easing (non-linear)
+      el.opacity *= 0.85;
+
+      // 🔥 shrink toward center (not top-left)
       const shrink = 0.94;
+
       const cx = el.x + el.w / 2;
       const cy = el.y + el.h / 2;
 
@@ -61,51 +67,20 @@ export function drawElements(ctx) {
 
       el.x = cx - el.w / 2;
       el.y = cy - el.h / 2;
-
-      // 🔥 drift down
-      el.y += 0.5;
-    }
-
-    // 🔥 revive animation (undo)
-    else if (el.reviving) {
-      el.opacity = Math.min(1, (el.opacity ?? 0) + 0.08);
-
-      const grow = 1.06;
-      const cx = el.x + el.w / 2;
-      const cy = el.y + el.h / 2;
-
-      el.w *= grow;
-      el.h *= grow;
-
-      el.x = cx - el.w / 2;
-      el.y = cy - el.h / 2;
-
-      if (el.opacity >= 0.98) {
-        el.reviving = false;
-        el.opacity = 1;
-      }
-    }
-
-    else {
+    } else {
       el.opacity = Math.min(1, el.opacity ?? 1);
     }
 
-    // ================= VISUAL FX =================
+    // apply opacity
     ctx.globalAlpha = el.opacity ?? 1;
 
-    // 🔥 blur on delete
-    if (el.deleting) {
-      ctx.filter = `blur(${(1 - el.opacity) * 8}px)`;
-    } else {
-      ctx.filter = "none";
-    }
-
-    // ================= DRAW =================
+    // ================= RECT =================
     if (el.type === "rect") {
       ctx.fillStyle = el.color;
       ctx.fillRect(el.x, el.y, el.w, el.h);
     }
 
+    // ================= SKETCH =================
     if (el.type === "sketch") {
       ctx.strokeStyle = el.color || colors.stroke;
       ctx.lineWidth = el.width / state.camera.zoom;
@@ -118,6 +93,7 @@ export function drawElements(ctx) {
       ctx.stroke();
     }
 
+    // ================= IMAGE =================
     if (el.type === "image") {
       ensureImage(el);
       if (el.img && el.img.complete) {
@@ -125,6 +101,7 @@ export function drawElements(ctx) {
       }
     }
 
+    // ================= TEXT =================
     if (el.type === "text") {
       ctx.fillStyle = el.style.color || colors.text;
 
@@ -144,8 +121,9 @@ export function drawElements(ctx) {
           const test = currentLine ? currentLine + " " + word : word;
           const width = ctx.measureText(test).width;
 
-          if (width <= maxWidth) currentLine = test;
-          else {
+          if (width <= maxWidth) {
+            currentLine = test;
+          } else {
             if (currentLine) lines.push(currentLine);
             currentLine = word;
           }
@@ -173,12 +151,15 @@ export function drawElements(ctx) {
         0,
       );
 
-      if (!el.fixedWidth) el.w = widest;
-      else if (widest > el.w) el.w = widest;
+      if (!el.fixedWidth) {
+        el.w = widest;
+      } else {
+        if (widest > el.w) el.w = widest;
+      }
     }
 
+    // reset alpha for next draw
     ctx.globalAlpha = 1;
-    ctx.filter = "none";
 
     // ================= SELECTION =================
     if (
@@ -189,7 +170,7 @@ export function drawElements(ctx) {
     }
   });
 
-  // ================= CLEANUP =================
+  // ================= CLEANUP (actual removal) =================
   state.elements = state.elements.filter((el) => (el.opacity ?? 1) > 0.02);
 }
 
