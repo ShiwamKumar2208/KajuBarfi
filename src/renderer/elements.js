@@ -51,11 +51,22 @@ export function drawElements(ctx) {
 
     // ================= FADE LOGIC =================
     if (el.deleting) {
-      el.opacity = (el.opacity ?? 1) - 0.08;
+      el.opacity = (el.opacity ?? 1);
 
-      // optional shrink (feels 🔥)
-      el.w *= 0.97;
-      el.h *= 0.97;
+      // 🔥 easing (non-linear)
+      el.opacity *= 0.85;
+
+      // 🔥 shrink toward center (not top-left)
+      const shrink = 0.94;
+
+      const cx = el.x + el.w / 2;
+      const cy = el.y + el.h / 2;
+
+      el.w *= shrink;
+      el.h *= shrink;
+
+      el.x = cx - el.w / 2;
+      el.y = cy - el.h / 2;
     } else {
       el.opacity = Math.min(1, el.opacity ?? 1);
     }
@@ -160,7 +171,7 @@ export function drawElements(ctx) {
   });
 
   // ================= CLEANUP (actual removal) =================
-  state.elements = state.elements.filter((el) => (el.opacity ?? 1) > 0);
+  state.elements = state.elements.filter((el) => (el.opacity ?? 1) > 0.02);
 }
 
 window.updateQuickActions?.();
