@@ -8,6 +8,8 @@ export const state = {
       w: 200,
       h: 100,
       src: "./wel.png",
+      deleting: false,
+      opacity: 1,
     },
   ],
   camera: { x: 0, y: 0, zoom: 1 },

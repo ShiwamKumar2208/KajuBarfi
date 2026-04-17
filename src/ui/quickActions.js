@@ -33,9 +33,10 @@ export function setupQuickActions() {
   window.updateQuickActions = update;
 
   del.onclick = () => {
-    state.elements = state.elements.filter(
-      (el) => !state.selectedElements.includes(el)
-    );
+    state.selectedElements.forEach(el => {
+      el.deleting = true;
+    });
+
     state.selectedElements = [];
     state.selectedElement = null;
     saveState();

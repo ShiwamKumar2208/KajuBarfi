@@ -45,8 +45,23 @@ function drawSelection(ctx, el, zoom) {
 export function drawElements(ctx) {
   const colors = getThemeColors();
 
-  state.elements.forEach((el) => {
+  // 🔥 IMPORTANT: iterate copy (we'll mutate later)
+  state.elements.slice().forEach((el) => {
     if (el.locked === undefined) el.locked = false;
+
+    // ================= FADE LOGIC =================
+    if (el.deleting) {
+      el.opacity = (el.opacity ?? 1) - 0.08;
+
+      // optional shrink (feels 🔥)
+      el.w *= 0.97;
+      el.h *= 0.97;
+    } else {
+      el.opacity = Math.min(1, el.opacity ?? 1);
+    }
+
+    // apply opacity
+    ctx.globalAlpha = el.opacity ?? 1;
 
     // ================= RECT =================
     if (el.type === "rect") {
@@ -83,7 +98,6 @@ export function drawElements(ctx) {
       ctx.font = `${fontSize}px ${el.style.fontFamily}`;
       ctx.textBaseline = "top";
 
-      // 🔥 FIX: stable width source
       const baseWidth = el.fixedWidth ? el.w : Math.abs(el.w) || 200;
       const maxWidth = ENABLE_TEXT_WRAP ? baseWidth : Infinity;
 
@@ -119,7 +133,6 @@ export function drawElements(ctx) {
         ctx.fillText(line, el.x, el.y + i * fontSize);
       });
 
-      // 🔥 IMPORTANT: only update height ALWAYS
       el.h = fontSize * lines.length;
 
       const widest = Math.max(
@@ -127,24 +140,27 @@ export function drawElements(ctx) {
         0,
       );
 
-      // 🔥 ALWAYS ensure width fits text
       if (!el.fixedWidth) {
         el.w = widest;
       } else {
-        // 🔥 FIX: expand if text overflows box
-        if (widest > el.w) {
-          el.w = widest;
-        }
+        if (widest > el.w) el.w = widest;
       }
     }
 
-    // if (state.selectedElement === el) {
-    //   drawSelection(ctx, el, state.camera.zoom);
-    // }
-    if (state.selectedElements?.includes(el) || state.selectedElement === el) {
+    // reset alpha for next draw
+    ctx.globalAlpha = 1;
+
+    // ================= SELECTION =================
+    if (
+      state.selectedElements?.includes(el) ||
+      state.selectedElement === el
+    ) {
       drawSelection(ctx, el, state.camera.zoom);
     }
   });
+
+  // ================= CLEANUP (actual removal) =================
+  state.elements = state.elements.filter((el) => (el.opacity ?? 1) > 0);
 }
 
 window.updateQuickActions?.();

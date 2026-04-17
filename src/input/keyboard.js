@@ -174,9 +174,14 @@ export function setupKeyboard() {
     // ================= DELETE =================
     if (key === "delete" || key === "backspace") {
       if (state.selectedElements.length > 0) {
-        state.elements = state.elements.filter(
-          (el) => !state.selectedElements.includes(el)
-        );
+        state.selectedElements.forEach(el => {
+          el.deleting = true;
+        });
+
+        state.selectedElements = [];
+        state.selectedElement = null;
+
+        saveState();
 
         state.selectedElements = [];
         state.selectedElement = null;
