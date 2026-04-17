@@ -5,7 +5,7 @@ import { reviveElements } from "./image.js";
 function clone(data) {
   return JSON.parse(
     JSON.stringify(data, (key, value) => {
-      if (key === "img") return undefined; // ❌ remove image object
+      if (key === "img") return undefined;
       return value;
     }),
   );
@@ -23,11 +23,32 @@ export function saveState() {
 
   const last = state.history[state.history.length - 1];
 
-  if (last && isSame(last, snapshot)) return; // 🚫 skip duplicate
+  if (last && isSame(last, snapshot)) return;
 
   state.history.splice(state.historyIndex + 1);
   state.history.push(snapshot);
   state.historyIndex++;
+}
+
+// 🔥 APPLY REVIVE ANIMATION
+function applyReviveAnimation(elements) {
+  elements.forEach((el) => {
+    el.reviving = true;
+    el.deleting = false; // just in case
+
+    el.opacity = 0;
+
+    // 🔥 slight initial shrink so it grows nicely
+    const scale = 0.92;
+    const cx = el.x + el.w / 2;
+    const cy = el.y + el.h / 2;
+
+    el.w *= scale;
+    el.h *= scale;
+
+    el.x = cx - el.w / 2;
+    el.y = cy - el.h / 2;
+  });
 }
 
 export function undo() {
@@ -42,7 +63,10 @@ export function undo() {
 
   Object.assign(state.camera, clone(snapshot.camera));
 
-  reviveElements(state.elements); // 🔥 restore images
+  reviveElements(state.elements);
+
+  // 🔥 THIS IS THE KEY
+  applyReviveAnimation(state.elements);
 }
 
 export function redo() {
@@ -57,5 +81,8 @@ export function redo() {
 
   Object.assign(state.camera, clone(snapshot.camera));
 
-  reviveElements(state.elements); // 🔥 restore images
+  reviveElements(state.elements);
+
+  // 🔥 SAME HERE
+  applyReviveAnimation(state.elements);
 }
